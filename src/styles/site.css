@@ -1,0 +1,456 @@
+/* AD Couverture Rénove — « Aucun montage »
+   Noir, un seul bleu en aplats, la tuile pour seule matière spectaculaire.
+   Ordinateur uniquement : 1440 à 1920 px. Tailles en vw bornées par vh pour tenir sur un écran. */
+
+@font-face { font-family: 'Big Shoulders Display'; font-weight: 900; font-display: swap;
+  src: url('/fonts/big-shoulders-display-latin-900-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Big Shoulders Display'; font-weight: 900; font-display: swap;
+  src: url('/fonts/big-shoulders-display-latin-ext-900-normal.woff2') format('woff2');
+  unicode-range: U+0178; }
+@font-face { font-family: 'Big Shoulders Display'; font-weight: 800; font-display: swap;
+  src: url('/fonts/big-shoulders-display-latin-800-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+@font-face { font-family: 'Familjen Grotesk'; font-weight: 400; font-display: swap;
+  src: url('/fonts/familjen-grotesk-latin-400-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2212, U+FEFF, U+FFFD; }
+@font-face { font-family: 'Familjen Grotesk'; font-weight: 400; font-display: swap;
+  src: url('/fonts/familjen-grotesk-latin-ext-400-normal.woff2') format('woff2');
+  unicode-range: U+0178; }
+@font-face { font-family: 'Familjen Grotesk'; font-weight: 500; font-display: swap;
+  src: url('/fonts/familjen-grotesk-latin-500-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+@font-face { font-family: 'Familjen Grotesk'; font-weight: 600; font-display: swap;
+  src: url('/fonts/familjen-grotesk-latin-600-normal.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+2000-206F, U+20AC; }
+
+:root {
+  --noir: #050507;
+  --blanc: #F1F1EE;
+  --bleu: #395CC9;
+  --bleu-clair: #8FA6F2;
+  --gris: #8C8C89;
+  --m: 2.2vw;
+  --pied-h: 84px;
+  --toit: min(9.6vw, 16.5vh);   /* hauteur du toit au bord de l'écran */
+  --fond: var(--noir);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { scrollbar-width: none; -webkit-text-size-adjust: 100%; }
+html::-webkit-scrollbar { display: none; }
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: clip; }
+body {
+  margin: 0;
+  background: var(--noir); color: var(--blanc);
+  font: 400 clamp(16px, 1.08vw, 20px)/1.42 'Familjen Grotesk', Arial, sans-serif;
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  font-kerning: normal;
+}
+::selection { background: var(--bleu); color: var(--blanc); }
+img { display: block; max-width: 100%; }
+h1, h2, h3, p, ul, figure, fieldset { margin: 0; padding: 0; border: 0; }
+ul { list-style: none; }
+a { color: inherit; text-decoration: none; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 3px solid var(--bleu-clair); outline-offset: 3px; }
+
+.titre {
+  font-family: 'Big Shoulders Display', 'Arial Narrow', Impact, sans-serif;
+  font-weight: 900; text-transform: uppercase;
+  line-height: .9; letter-spacing: -.004em;
+}
+
+/* Le langage d'animation : un volet de la couleur du fond, et un court fondu pour le texte. */
+.volet {
+  position: absolute; inset: 0; z-index: 2; display: block;
+  background: var(--fond); transform-origin: 50% 0;
+  pointer-events: none;
+}
+.js [data-fondu] { opacity: 0; }
+
+/* Boutons : aplat franc, sans arrondi. Le survol est une coupe, sans transition. */
+.bouton {
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--bleu); color: var(--blanc);
+  font-weight: 600; padding: .68em 1em; white-space: nowrap;
+  user-select: none;
+}
+.bouton:hover { background: var(--blanc); color: var(--noir); }
+.bouton-grand { font-size: 1.14em; padding: .9em 1.2em; }
+.lien { text-decoration: underline; text-underline-offset: .18em; }
+.lien:hover { color: var(--bleu-clair); }
+
+/* Le titre sur les pentes : les lettres restent verticales, les lignes suivent la pente du toit,
+   exactement le même angle que la barre. Chaque mot sort de derrière le faîtage. */
+.pente { display: block; }
+.pente-g { text-align: right; transform: skewY(-10.6deg); transform-origin: 100% 100%; }
+.pente-d { text-align: left; transform: skewY(10.6deg); transform-origin: 0 100%; }
+.mot { display: block; overflow: hidden; white-space: nowrap; padding-block: .17em .1em; margin-block: -.17em -.1em; }
+.mot > span { display: inline-block; }
+.js .mot > span { visibility: hidden; }
+.virgule { font-weight: inherit; position: relative; top: -.07em; }
+
+/* ———————————————— La barre : un toit ———————————————— */
+.barre { position: fixed; inset: 0 0 auto 0; height: 0; z-index: 50; }
+.js .barre { visibility: hidden; } /* rien n'apparaît par morceaux : tout part avec l'ouverture */
+.barre-toit {
+  position: absolute; left: 0; top: 0; width: 100%; height: var(--toit); display: block;
+  background: var(--noir);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 0, 0 100%);
+  pointer-events: none;
+}
+.barre-logo {
+  --largeur: min(11.8vw, 20.6vh);
+  position: absolute; top: .4vw; display: block;
+  left: calc(var(--m) - var(--largeur) * .0422); /* l'encre du logo, pas son fond, tombe sur la marge du site */
+  width: var(--largeur);
+}
+.barre-logo img { width: 100%; height: auto; }
+.barre-actions {
+  position: absolute; right: 0; top: 0;
+  display: flex; align-items: center; gap: 1.5vw;
+  background: var(--noir); padding-left: 1.2vw; /* invisible sur le toit, indispensable sur le bloc du menu */
+}
+.barre-menu { font-weight: 500; }
+.barre-menu:hover { color: var(--bleu-clair); }
+.barre-tel {
+  font: 800 clamp(26px, 2.1vw, 38px)/1 'Big Shoulders Display', sans-serif;
+  letter-spacing: .012em;
+}
+.barre-devis {
+  display: block; background: var(--bleu); color: var(--blanc);
+  font-weight: 600; padding: .92em 1.15em;
+}
+.barre-devis:hover { background: var(--blanc); color: var(--noir); }
+
+/* ———————————————— Haut de page ———————————————— */
+.haut {
+  /* Écart entre chaque ligne et l'axe du toit : il suit le faîtage, plus large vers le bas. */
+  --d1: 6.1vw;
+  --d2: 6.9vw;
+  position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: var(--noir);
+}
+.haut-photo { position: absolute; inset: 0; overflow: hidden; }
+.haut-photo img, .haut-photo canvas {
+  position: absolute; inset: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 50% 50%; display: block;
+}
+.haut-photo canvas { opacity: 0; }
+.haut-photo canvas.pret { opacity: 1; }
+.haut-titre {
+  position: absolute; z-index: 3; left: 0; right: 0; top: calc(45.2% - .18em); transform: translateY(-50%);
+  display: grid; grid-template-columns: 1fr 1fr;
+  font-size: min(9.4vw, 16.6vh); line-height: 1.05;
+  pointer-events: none;
+}
+/* Chaque marge retire le blanc propre à la lettre : c'est l'encre qui s'aligne, au pixel près. */
+.haut-titre .pente-g .mot:nth-child(1) { margin-right: calc(var(--d1) - .006em); } /* T */
+.haut-titre .pente-g .mot:nth-child(2) { margin-right: calc(var(--d2) - .006em); } /* T */
+.haut-titre .pente-d .mot:nth-child(1) { margin-left: calc(var(--d1) - .025em); }  /* S */
+.haut-titre .pente-d .mot:nth-child(2) { margin-left: calc(var(--d2) - .04em); }   /* P */
+
+/* ———————————————— Prestations ———————————————— */
+.prestations {
+  --pied-p: 58px;
+  position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: var(--noir);
+}
+.panneaux { position: absolute; inset: 0 0 var(--pied-p) 0; overflow: hidden; background: var(--noir); }
+.panneau {
+  position: absolute; left: 0; top: 0; height: 100%;
+  width: 47vw; /* largeur ouverte, fixe : seuls des transforms bougent */
+  overflow: hidden; background: var(--noir);
+  box-shadow: -1px 0 0 var(--noir);
+  will-change: transform; outline-offset: -6px;
+}
+.panneau-photo { position: absolute; inset: 0; will-change: transform; }
+.panneau-photo img { width: 100%; height: 100%; object-fit: cover; }
+.panneau-voile {
+  position: absolute; inset: 0; z-index: 1; background: var(--noir);
+  opacity: .26; pointer-events: none; will-change: opacity;
+}
+.panneau-titre {
+  position: absolute; z-index: 3; left: 0; bottom: 0; padding: 1.2vw .8vw;
+  font-size: min(6.6vw, 10.6vh);
+  writing-mode: vertical-rl; transform: rotate(180deg);
+  line-height: .86; white-space: nowrap;
+  pointer-events: none;
+}
+/* Ouvert, le titre passe sur un aplat noir : la photo reprend toute sa lumière et le titre reste lisible. */
+.panneau.ouvert .panneau-titre { background: var(--noir); }
+/* À l'ouverture, une seule bande noire monte du bas du panneau : une phrase et un bouton. */
+.panneau-info {
+  position: absolute; z-index: 2; left: 0; right: 0; bottom: 0;
+  padding: 1.15vw 1.3vw 1.15vw calc(min(6.6vw, 10.6vh) * .86 + 2.6vw);
+  background: var(--noir);
+  display: flex; align-items: center; justify-content: space-between; gap: 1.5vw;
+  transform: translateY(101%); will-change: transform;
+}
+.panneau-info p { font-size: 1.04em; line-height: 1.28; text-wrap: pretty; }
+.panneau-info .bouton { flex: none; }
+.prestations-pied {
+  position: absolute; left: var(--m); right: var(--m); bottom: 0; height: var(--pied-p);
+  display: flex; align-items: center; line-height: 1.15;
+}
+.prestations-pied strong { font-weight: 600; margin-right: .36em; }
+
+/* ———————————————— L'entreprise ———————————————— */
+.entreprise {
+  --f: min(12.4vw, 22.5vh);                   /* taille du titre */
+  --sommet: calc(var(--f) * .8 + 3vw);        /* hauteur du faîte de la photo */
+  --socle: max(15.5vh, 8.6vw);
+  position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: var(--noir);
+}
+.entreprise-titre {
+  position: absolute; z-index: 3; left: 0; right: 0; top: 0; height: var(--sommet);
+  display: grid; grid-template-columns: 1fr 1fr; column-gap: 2.6vw; align-items: end;
+  padding: 0 var(--m) .55vw;
+  font-size: var(--f); line-height: .82;
+}
+/* La photo a la même pente que la barre : le titre tient toujours entre les deux. */
+.entreprise-titre .pente-g .mot { margin-right: -.022em; } /* E */
+.entreprise-titre .pente-d .mot { margin-left: -.04em; }  /* E */
+.entreprise-photo {
+  position: absolute; left: 0; right: 0; top: var(--sommet); bottom: var(--socle); overflow: hidden;
+  clip-path: polygon(0 var(--toit), 50% 0, 100% var(--toit), 100% 100%, 0 100%);
+}
+.entreprise-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
+.entreprise-socle {
+  position: absolute; left: var(--m); right: var(--m); bottom: 0; height: var(--socle);
+  display: flex; flex-direction: column; justify-content: center; gap: .55vw;
+}
+.entreprise-socle ul { display: flex; justify-content: space-between; font-size: min(4.6vw, 8vh); line-height: 1; margin: 0 -.022em 0 -.025em; }
+.entreprise-socle p { font-size: 1.02em; line-height: 1.3; }
+
+/* ———————————————— Façades ———————————————— */
+.facade {
+  position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: var(--noir);
+  --photo: min(calc(100vh * 1.06), 66vw);
+}
+.facade-photos {
+  position: absolute; top: 0; right: 0; bottom: 0; width: var(--photo); overflow: hidden;
+  cursor: pointer; touch-action: none; user-select: none;
+}
+.facade-photos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 0% 100%; -webkit-user-drag: none; }
+.facade-avant { visibility: hidden; z-index: 1; }
+.facade.tenu .facade-avant { visibility: visible; }
+.facade-texte {
+  position: absolute; z-index: 3; left: var(--m); top: calc(var(--toit) + 1vw); bottom: 2vw;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between;
+}
+.facade-titre { font-size: min(8.8vw, 15vh); white-space: nowrap; line-height: 1.04; margin-left: -.04em; }
+.facade-titre span { display: block; }
+.facade-bouton { min-width: 21em; }
+.facade.tenu .facade-bouton { background: var(--blanc); color: var(--noir); }
+
+/* ———————————————— Le mur ———————————————— */
+.mur { position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: #09090B; }
+.mur-vue { position: absolute; inset: 0 0 56px 0; overflow: hidden; cursor: grab; touch-action: none; user-select: none; }
+.mur-vue.sur-bloc { cursor: pointer; }
+.mur-vue.glisse { cursor: grabbing; }
+.mur-monde { position: absolute; left: 0; top: 0; width: 1px; height: 1px; will-change: transform; }
+.tuile {
+  position: absolute; display: block; overflow: hidden; padding: 0; cursor: pointer;
+  background: var(--c, #111); contain: strict;
+  transition: opacity .18s linear;
+}
+.mur-monde.en-transition .tuile { transition: none; }
+.tuile img { width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; pointer-events: none; }
+.tuile .volet { --fond: #09090B; z-index: 1; }
+.tuile:focus-visible { outline-offset: -3px; z-index: 2; }
+.mur-vue.glisse .tuile { pointer-events: none; }
+.mur-monde[data-survol] .tuile:not([data-chantier-actif]) { opacity: .42; }
+.mur-titre {
+  position: absolute; z-index: 3; font-size: min(11.2vw, 20vh); line-height: .86; white-space: nowrap; pointer-events: none; color: var(--blanc);
+}
+.mur-commandes {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 56px; z-index: 3;
+  padding: 0 var(--m); background: var(--noir);
+  display: flex; align-items: center; justify-content: space-between; gap: 2vw;
+}
+.mur-filtres { position: relative; display: flex; gap: 1.7vw; font-weight: 500; }
+.mur-filtres button { color: var(--gris); padding: .2em 0; }
+.mur-filtres button:hover { color: var(--blanc); }
+.mur-filtres button[aria-pressed="true"] { color: var(--blanc); }
+.mur-curseur {
+  position: absolute; left: 0; bottom: -3px; width: 100px; height: 3px; display: block;
+  background: var(--bleu); transform-origin: 0 50%; pointer-events: none;
+}
+.mur-aide { color: var(--gris); font-size: .92em; }
+
+/* Visionneuse */
+dialog { color: var(--blanc); }
+.visionneuse {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; max-height: none;
+  margin: 0; padding: 0; border: 0; background: var(--noir); overflow: hidden;
+}
+.visionneuse::backdrop { background: var(--noir); }
+.visionneuse-photo { position: absolute; inset: 0; }
+.visionneuse-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; }
+.visionneuse-zone { position: absolute; top: 0; bottom: 0; width: 50%; z-index: 1; }
+.visionneuse-prec { left: 0; cursor: w-resize; }
+.visionneuse-suiv { right: 0; cursor: e-resize; }
+.visionneuse-zone:focus-visible { outline-offset: -8px; }
+.visionneuse-haut {
+  position: absolute; z-index: 2; left: var(--m); right: var(--m); top: 1.5vw;
+  display: flex; align-items: flex-start; justify-content: space-between; pointer-events: none;
+}
+.visionneuse-titre { font-size: min(4vw, 7vh); }
+.visionneuse-fermer { pointer-events: auto; font-weight: 600; background: var(--blanc); color: var(--noir); padding: .6em 1.1em; }
+.visionneuse-fermer:hover { background: var(--bleu); color: var(--blanc); }
+.visionneuse-traits {
+  position: absolute; z-index: 2; left: var(--m); right: var(--m); bottom: 1.5vw;
+  display: flex; gap: 4px; height: 4px; pointer-events: none;
+}
+.visionneuse-traits i { flex: 1; background: #2A2A2E; }
+.visionneuse-traits i.vu { background: var(--bleu); }
+
+/* ———————————————— Urgence : un bandeau ———————————————— */
+.urgence {
+  --fond: var(--bleu);
+  position: relative; overflow: hidden;
+  background: var(--bleu); color: var(--blanc);
+  display: flex; flex-direction: column; gap: 1.2vw;
+  padding: 2.4vw var(--m) 1.8vw;
+}
+.urgence-titre { font-size: 4.4vw; white-space: nowrap; margin-left: -.031em; }
+.urgence-tel { display: block; font-size: 13vw; line-height: .86; white-space: nowrap; align-self: flex-end; letter-spacing: 0; margin-right: -.033em; }
+.urgence-tel:focus-visible { outline-color: var(--blanc); }
+
+/* ———————————————— Zone ———————————————— */
+.zone {
+  position: relative; min-height: 100vh; overflow: hidden; background: var(--noir);
+  display: grid; grid-template-columns: 39vw 1fr; align-items: center; column-gap: 1vw;
+  padding: var(--toit) var(--m) 3vw;
+}
+.zone-intro { font-size: 1.5em; line-height: 1.2; margin-bottom: .55em; }
+.zone-liste ul { font-size: min(6.2vw, 11vh); line-height: 1.04; }
+.zone-liste li {
+  white-space: nowrap; width: fit-content; cursor: default; margin-left: -.04em;
+  transition: color .28s linear, transform .55s cubic-bezier(.2, .8, .2, 1);
+}
+.zone-liste ul.survol li { color: #48484D; }
+.zone-liste ul.survol li.actif { color: var(--blanc); transform: translateX(.14em); }
+.js .zone-intro, .js .zone-liste li { opacity: 0; }
+.zone-carte { display: block; width: 100%; height: auto; max-height: calc(100vh - var(--toit) - 3vw); overflow: visible; }
+.zone-dessus { pointer-events: none; }
+.zone-carte .trait { stroke: var(--blanc); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.zone-carte text {
+  font: 900 104px 'Big Shoulders Display', Impact, sans-serif; fill: var(--blanc);
+  text-anchor: middle; dominant-baseline: central;
+}
+
+/* ———————————————— Avis ———————————————— */
+.avis {
+  background: var(--noir); padding: 4vw var(--m);
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(22vw, 1fr)); gap: 3vw;
+}
+.avis[hidden] { display: none; }
+.avis blockquote { margin: 0; font-size: 1.2em; line-height: 1.25; }
+.avis cite { display: block; margin-top: .8em; font-style: normal; color: var(--bleu-clair); font-size: .78em; }
+.avis-lien { grid-column: 1 / -1; color: var(--bleu-clair); }
+
+/* ———————————————— Devis ———————————————— */
+.devis {
+  --fond: var(--blanc);
+  position: relative; min-height: calc(100vh - var(--pied-h)); background: var(--blanc); color: var(--noir);
+  display: grid; grid-template-columns: 36vw 1fr; column-gap: 4vw;
+  padding: calc(var(--toit) + .6vw) var(--m) 2.2vw;
+}
+.devis ::selection { background: var(--bleu); color: var(--blanc); }
+.devis :focus-visible { outline-color: var(--bleu); }
+.devis-gauche { display: flex; flex-direction: column; justify-content: space-between; }
+.devis-titre { font-size: min(12vw, 21vh); margin-left: -.04em; }
+.devis-contact { display: flex; flex-direction: column; gap: .25em; }
+.devis-tel { font-size: min(4.6vw, 8vh); line-height: 1; margin-left: -.04em; }
+.devis-mail:hover { color: var(--bleu); }
+.devis-mail { font-size: 1.08em; font-weight: 500; }
+.devis-form { display: grid; grid-template-columns: 1fr 1fr; gap: min(1.8vh, 1.3vw) 2.4vw; align-content: space-between; }
+.devis-piege { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+.champ { display: flex; flex-direction: column; position: relative; min-width: 0; }
+.champ-large { grid-column: 1 / -1; }
+.champ label, .pastilles legend { font-size: .88em; font-weight: 600; margin-bottom: .22em; padding: 0; }
+.champ input, .champ textarea {
+  font: 400 1.14em/1.3 'Familjen Grotesk', Arial, sans-serif; color: var(--noir);
+  background: transparent; border: 0; border-bottom: 2px solid var(--noir); border-radius: 0;
+  padding: .3em 0 .36em; width: 100%; resize: none; outline: none;
+}
+.champ input:focus, .champ textarea:focus { border-bottom-color: var(--bleu); box-shadow: 0 2px 0 var(--bleu); }
+.champ.erreur input { border-bottom-color: #B3261E; box-shadow: 0 2px 0 #B3261E; }
+.champ-erreur { display: none; font-size: .8em; color: #B3261E; font-weight: 500; margin-top: .22em; }
+.champ.erreur .champ-erreur { display: block; }
+.pastilles { display: flex; flex-wrap: wrap; gap: .42em; flex-direction: row; }
+.pastilles legend { width: 100%; }
+.pastilles label { margin: 0; font-size: 1em; font-weight: 500; cursor: pointer; }
+.pastilles input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.pastilles span {
+  display: block; padding: .38em .95em .42em; border-radius: 999px;
+  border: 2px solid var(--noir); background: transparent; user-select: none;
+}
+.pastilles label:hover span { background: var(--noir); color: var(--blanc); }
+.pastilles input:checked + span { background: var(--bleu); border-color: var(--bleu); color: var(--blanc); }
+.pastilles input:focus-visible + span { outline: 3px solid var(--bleu); outline-offset: 3px; }
+.devis-envoi { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr auto; gap: 2vw; align-items: center; }
+.devis-mention { font-size: .86em; line-height: 1.3; max-width: 30em; }
+.devis-retour { grid-column: 1 / -1; font-weight: 600; padding: .6em .9em; }
+.devis-retour.ok { background: var(--noir); color: var(--blanc); }
+.devis-retour.ko { background: #B3261E; color: #fff; }
+.devis-retour a { text-decoration: underline; }
+.devis-form .bouton[disabled] { background: var(--noir); color: var(--blanc); cursor: progress; }
+.devis .bouton:hover { background: var(--noir); color: var(--blanc); }
+
+/* ———————————————— Pied de page ———————————————— */
+.pied {
+  background: var(--noir); padding: 0 var(--m); height: var(--pied-h);
+  display: grid; grid-template-columns: auto 1fr auto; column-gap: 3vw; align-items: center;
+  font-size: .92em;
+}
+.pied-logo { width: 104px; height: auto; }
+.pied-contact { display: flex; gap: 2.4vw; }
+.pied-contact a[href^="mailto"]:hover { color: var(--bleu-clair); }
+
+/* ———————————————— Menu ———————————————— */
+.menu { position: fixed; inset: 0; z-index: 45; }
+.menu[hidden] { display: none; }
+.menu-fond { position: absolute; inset: 0; background: var(--noir); }
+.menu-liens {
+  position: absolute; left: var(--m); top: var(--toit); bottom: 2vw;
+  display: flex; flex-direction: column; justify-content: center;
+  font-size: min(7.4vw, 12.2vh); line-height: 1;
+}
+.menu-liens a { display: block; overflow: hidden; padding: .06em 0 .12em; margin: -.06em 0 -.12em -.04em; }
+.menu-liens a[data-vue="chantiers"] { margin-left: -.035em; }
+.menu-liens a[data-vue="zone"] { margin-left: -.018em; }
+.menu-liens span { display: inline-block; transition: color .16s linear; }
+.menu-liens:hover span { color: #48484D; }
+.menu-liens a:hover span, .menu-liens a:focus-visible span { color: var(--blanc); }
+/* Le bloc : droit, plein bord à droite, du haut au bas de l'écran. */
+.menu-bloc { position: absolute; right: 0; top: 0; bottom: 0; width: 46vw; overflow: hidden; }
+.menu-vues { position: absolute; inset: 0; }
+.menu-vues img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; visibility: hidden; }
+.menu-vues img.active { visibility: visible; }
+
+/* Mentions légales */
+.mentions {
+  position: fixed; inset: 0; width: 100vw; height: 100vh; max-width: none; max-height: none; margin: 0; padding: 0; border: 0;
+  background: var(--blanc); color: var(--noir); overflow: auto;
+}
+.mentions::backdrop { background: var(--noir); }
+.mentions-corps { position: relative; padding: 2vw var(--m); max-width: 1500px; }
+.mentions h2 { font-size: min(6.4vw, 11vh); margin-bottom: .4em; }
+.mentions-colonnes { display: grid; grid-template-columns: 1fr 1fr; gap: 4vw; }
+.mentions h3 { font-size: 1em; font-weight: 600; margin: 1.5em 0 .3em; }
+.mentions-colonnes > div > h3:first-child { margin-top: 0; }
+.mentions a { text-decoration: underline; }
+.mentions mark { background: var(--bleu); color: var(--blanc); padding: 0 .3em; font-weight: 600; }
+.mentions-fermer { position: fixed; right: var(--m); top: 2vw; font-weight: 600; background: var(--noir); color: var(--blanc); padding: .6em 1.1em; z-index: 2; }
+.mentions-fermer:hover { background: var(--bleu); }
+
+@media (prefers-reduced-motion: reduce) {
+  .js [data-fondu], .js .zone-intro, .js .zone-liste li { opacity: 1; }
+  .js .mot > span { visibility: visible; }
+  .volet { display: none; }
+}

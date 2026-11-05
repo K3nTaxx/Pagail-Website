@@ -1,0 +1,15 @@
+node_modules
+dist
+.DS_Store
+.claude
+.netlify
+
+# Originaux : 1,5 Go, avec les coordonnées GPS des maisons des clients. Ne jamais les publier.
+Photos
+
+# Outils et documents de travail, qui restent sur le poste : le dépôt est public.
+scripts
+PROMPT-CLAUDE-CODE.md
+NOTES.md
+DA.md
+CONTENU.md
