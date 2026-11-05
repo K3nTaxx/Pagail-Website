@@ -199,25 +199,26 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 
 /* ———————————————— L'entreprise ———————————————— */
 .entreprise {
-  --f: min(12.4vw, 22.5vh);                   /* taille du titre */
-  --sommet: calc(var(--f) * .8 + 3vw);        /* hauteur du faîte de la photo */
+  --f: min(11vw, 19vh);                       /* taille du titre */
+  --l: min(72vw, 125vh);                      /* largeur de la maison : le camion reste net */
+  --sommet: calc(var(--f) * .8 + 3vw);        /* bas du titre, au faîte */
   --socle: max(15.5vh, 8.6vw);
   position: relative; height: 100vh; min-height: 700px; overflow: hidden; background: var(--noir);
 }
+/* Le ciel de la photo monte jusqu'au toit de la barre, et le titre s'y pose. */
+.entreprise-photo {
+  position: absolute; left: calc(50% - var(--l) / 2); width: var(--l); top: 0; bottom: var(--socle); overflow: hidden;
+  clip-path: polygon(0 calc(var(--l) * .09), 50% 0, 100% calc(var(--l) * .09), 100% 100%, 0 100%);
+}
+.entreprise-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 100%; }
 .entreprise-titre {
   position: absolute; z-index: 3; left: 0; right: 0; top: 0; height: var(--sommet);
   display: grid; grid-template-columns: 1fr 1fr; column-gap: 2.6vw; align-items: end;
   padding: 0 var(--m) .55vw;
-  font-size: var(--f); line-height: .82;
+  font-size: var(--f); line-height: .82; pointer-events: none;
 }
-/* La photo a la même pente que la barre : le titre tient toujours entre les deux. */
 .entreprise-titre .pente-g .mot { margin-right: -.022em; } /* E */
 .entreprise-titre .pente-d .mot { margin-left: -.04em; }  /* E */
-.entreprise-photo {
-  position: absolute; left: 0; right: 0; top: var(--sommet); bottom: var(--socle); overflow: hidden;
-  clip-path: polygon(0 var(--toit), 50% 0, 100% var(--toit), 100% 100%, 0 100%);
-}
-.entreprise-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 42%; }
 .entreprise-socle {
   position: absolute; left: var(--m); right: var(--m); bottom: 0; height: var(--socle);
   display: flex; flex-direction: column; justify-content: center; gap: .55vw;
