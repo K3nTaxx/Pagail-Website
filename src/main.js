@@ -189,15 +189,16 @@ function facade() {
   });
 }
 
-/* ———————— Zones d'intervention : le disque des 40 km autour de Monistrol-sur-Loire ———————— */
+/* ———————— Zones d'intervention : les contours des quatre départements se tracent seuls à l'arrivée.
+   Au survol d'un département, ses communes ressortent dans la liste ; au survol d'une commune, son département ———————— */
 function zone() {
   const section = $('#zone');
   const carte = $('#zone-carte');
   const liste = $('#zone-noms');
   const NS = 'http://www.w3.org/2000/svg';
-  const [cx, cy] = Z.centre;
-  const R = Z.rayon;
-  const codes = Object.keys(Z.departements);
+  const ORDRE = ['42', '43', '69', '38'];
+  // Le point de chaque département le plus éloigné de ses bords : le numéro y tient toujours.
+  const CENTRES = { 42: [296, 213], 43: [232, 534], 69: [482, 240], 38: [842, 552] };
   carte.setAttribute('viewBox', Z.viewBox);
   const creer = (nom, attrs, parent = carte) => {
     const el = document.createElementNS(NS, nom);
@@ -206,104 +207,83 @@ function zone() {
     return el;
   };
   const defs = creer('defs', {});
-  creer('circle', { cx, cy, r: R }, creer('clipPath', { id: 'zone-disque' }, defs));
-  codes.forEach((code) => creer('path', { d: Z.departements[code].d }, creer('clipPath', { id: `dep-${code}` }, defs)));
+  ORDRE.forEach((code) => creer('path', { d: Z.departements[code].d }, creer('clipPath', { id: `dep-${code}` }, defs)));
 
-  // Autour du disque : les départements voisins et les contours, à peine visibles, pour se situer.
-  // Ils s'effacent vers les bords : aucune ligne coupée net.
-  const fondu = creer('radialGradient', { id: 'zone-fondu', gradientUnits: 'userSpaceOnUse', cx, cy, r: 500 }, defs);
-  creer('stop', { offset: 0.78, 'stop-color': '#fff' }, fondu);
-  creer('stop', { offset: 1, 'stop-color': '#000' }, fondu);
-  creer('rect', { x: 0, y: 0, width: 1000, height: 1000, fill: 'url(#zone-fondu)' }, creer('mask', { id: 'zone-masque', maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: 1000, height: 1000 }, defs));
-  const fond = creer('g', { class: 'zone-fond', mask: 'url(#zone-masque)' });
-  creer('path', { d: Z.voisins, class: 'voisins' }, fond);
-  codes.forEach((code) => creer('path', { d: Z.departements[code].d, class: 'voisins' }, fond));
-  // Dans le disque : la tuile, découpée par les vrais contours de la Loire et de la Haute-Loire.
-  // La tuile reste sombre : les points et les noms doivent ressortir dessus.
-  const TUILE = 0.5;
-  const disque = creer('g', { 'clip-path': 'url(#zone-disque)' });
-  const tuiles = codes.map((code) => creer('image', {
-    'clip-path': `url(#dep-${code})`, preserveAspectRatio: 'xMidYMid slice',
-    x: cx - R, y: cy - R, width: 2 * R, height: 2 * R, opacity: reduit ? TUILE : 0,
-  }, disque));
-  const traits = codes.map((code) => creer('path', { d: Z.departements[code].d, class: 'trait' }, disque));
-  const cercle = creer('circle', { cx, cy, r: R, class: 'cercle', pathLength: 1000, 'stroke-dasharray': 1000, 'stroke-dashoffset': reduit ? 0 : 1000 });
-  const a = Math.PI / 3;
-  const km = creer('text', { x: cx + Math.cos(a) * (R + 26), y: cy + Math.sin(a) * (R + 26), class: 'km', opacity: reduit ? 1 : 0 });
-  km.textContent = `${Z.rayonKm} km`;
-  const numeros = codes.map((code) => {
-    const [x, y] = Z.departements[code].numero;
-    const t = creer('text', { x, y, class: 'numero', opacity: reduit ? 1 : 0 });
-    t.textContent = code;
-    return t;
-  });
-  // Sur téléphone, la carte est trois fois plus petite : les points et les noms grossissent d'autant.
-  const k = telephone ? 1.8 : 1;
-  const repos = (v) => (v.centre ? 11 : 7) * k;
-  const villes = new Map();
-  Z.villes.forEach((v) => {
-    const centre = v.nom === 'Monistrol-sur-Loire';
-    const g = creer('g', { class: centre ? 'ville centre' : 'ville', 'data-code': v.code });
-    creer('circle', { cx: v.x, cy: v.y, r: 30 * k, class: 'cible' }, g); // une cible plus large que le point
-    const point = creer('circle', { cx: v.x, cy: v.y, r: reduit ? (centre ? 11 : 7) * k : 0, class: 'point' }, g);
-    // Les communes autour de Monistrol sont serrées : son nom descend sous le point, au bout d'un filet.
-    if (centre) creer('line', { x1: v.x, y1: v.y + 14 * k, x2: v.x, y2: v.y + 100 * k, class: 'filet' }, g);
-    const aDroite = v.x < 640;
-    const nom = centre
-      ? creer('text', { x: v.x, y: v.y + 134 * k, 'text-anchor': 'middle', class: 'nom' }, g)
-      : creer('text', { x: v.x + (aDroite ? 20 : -20) * k, y: v.y - 16 * k, 'text-anchor': aDroite ? 'start' : 'end', class: 'nom' }, g);
-    nom.textContent = v.nom;
-    villes.set(v.code, { g, point, nom, centre, fond: null });
-  });
-  // L'aplat sous le nom se mesure une fois la police chargée.
-  const aplat = (v) => {
-    if (v.fond) return;
-    const b = v.nom.getBBox();
-    if (!b.width) return;
-    v.fond = document.createElementNS(NS, 'rect');
-    Object.entries({ x: b.x - 9 * k, y: b.y - 3 * k, width: b.width + 18 * k, height: b.height + 6 * k, class: 'fond-nom' })
-      .forEach(([n, val]) => v.fond.setAttribute(n, val));
-    v.g.insertBefore(v.fond, v.nom);
+  const dessiner = (code, parent) => {
+    const g = creer('g', {}, parent);
+    const image = creer('image', { 'clip-path': `url(#dep-${code})`, preserveAspectRatio: 'xMidYMid slice' }, g);
+    const trait = creer('path', { d: Z.departements[code].d, class: 'trait' }, g);
+    const b = trait.getBBox();
+    Object.entries({ x: b.x, y: b.y, width: b.width, height: b.height }).forEach(([k, v]) => image.setAttribute(k, v));
+    const [x, y] = CENTRES[code];
+    const texte = creer('text', { x, y }, g);
+    texte.textContent = code;
+    return { g, image, trait, texte, b };
   };
-  traits.forEach((t) => { t.setAttribute('pathLength', 1000); t.setAttribute('stroke-dasharray', 1000); t.setAttribute('stroke-dashoffset', reduit ? 0 : 1000); });
-  if (!reduit) fond.setAttribute('opacity', 0);
+  const couches = {};
+  ORDRE.forEach((code) => { couches[code] = dessiner(code, carte); });
+  // La couche du survol passe au-dessus des autres sans bouger celles qui captent la souris :
+  // le département grossit sans que le curseur ne « sorte » de lui.
+  const dessus = creer('g', { class: 'zone-dessus' });
+  ORDRE.forEach((code) => {
+    const h = dessiner(code, dessus);
+    couches[code].haut = h;
+    gsap.set(h.g, { opacity: 0, svgOrigin: `${h.b.x + h.b.width / 2} ${h.b.y + h.b.height / 2}` });
+  });
+  ORDRE.forEach((code) => {
+    const c = couches[code];
+    c.trait.setAttribute('pathLength', 1000);
+    c.trait.setAttribute('stroke-dasharray', 1000);
+    c.trait.setAttribute('stroke-dashoffset', reduit ? 0 : 1000);
+    if (!reduit) { c.image.setAttribute('opacity', 0); c.texte.setAttribute('opacity', 0); }
+  });
 
-  // Les deux tuiles ne partent que lorsque la section approche.
+  // Les quatre tuiles ne partent que lorsque la section approche.
   let promesses = null;
-  const pretes = () => (promesses ??= codes.map((code, k) => new Promise((r) => {
+  const pretes = () => (promesses ??= ORDRE.map((code) => new Promise((r) => {
     const i = new Image();
     i.src = `/img/zone/${code}.webp`;
-    i.decode().catch(() => {}).then(() => { tuiles[k].setAttribute('href', i.src); r(); });
+    i.decode().catch(() => {}).then(() => {
+      couches[code].image.setAttribute('href', i.src);
+      couches[code].haut.image.setAttribute('href', i.src);
+      r();
+    });
   })));
   new IntersectionObserver(([e], obs) => { if (e.isIntersecting) { obs.disconnect(); pretes(); } }, { rootMargin: '200% 0px' }).observe(section);
 
+  // Une commune appartient au département de son code : 43… la Haute-Loire, 42… la Loire.
+  const communes = $$('li', liste);
+  const departement = (li) => li.dataset.code.slice(0, 2);
   let actif = null, pret = reduit;
-  const surligner = (code) => {
-    if (!pret || code === actif) return;
-    actif = code;
-    if (code) { aplat(villes.get(code)); villes.get(code).g.parentNode.append(villes.get(code).g); }
-    liste.classList.toggle('survol', !!code);
-    $$('li', liste).forEach((li) => li.classList.toggle('actif', li.dataset.code === code));
-    villes.forEach((v, c) => {
-      v.g.classList.toggle('actif', c === code);
-      v.g.classList.toggle('efface', !!code && c !== code);
-      gsap.to(v.point, { attr: { r: c === code ? 13 * k : repos(v) }, duration: reduit ? 0 : 0.35, ease: 'power3.out', overwrite: 'auto' });
+  const surligner = (code, li = null) => {
+    const cle = li ? li.dataset.code : code;
+    if (!pret || cle === actif) return;
+    actif = cle;
+    const allumees = li ? [li] : communes.filter((x) => departement(x) === code);
+    liste.classList.toggle('survol', allumees.length > 0);
+    communes.forEach((x) => x.classList.toggle('actif', allumees.includes(x)));
+    const v = reduit ? 0 : 1;
+    ORDRE.forEach((c) => {
+      const o = couches[c];
+      const lui = c === code;
+      gsap.to(o.g, { opacity: code ? 0.26 : 1, duration: 0.32 * v, ease: 'power2.out', overwrite: 'auto' });
+      gsap.to(o.haut.g, { opacity: lui ? 1 : 0, scale: lui ? 1.08 : 1, duration: (lui ? 0.65 : 0.34) * v, ease: lui ? 'power3.out' : 'power2.out', overwrite: 'auto' });
     });
   };
   if (telephone) {
-    // Pas de survol au doigt : on touche une ville, et on retouche pour revenir.
-    const basculer = (code) => surligner(actif === code ? null : code);
-    $$('li', liste).forEach((li) => li.addEventListener('click', (e) => { e.stopPropagation(); basculer(li.dataset.code); }));
-    villes.forEach((v, c) => v.g.addEventListener('click', (e) => { e.stopPropagation(); basculer(c); }));
+    // Pas de survol au doigt : on touche une commune ou un département, et on retouche pour revenir.
+    const basculer = (code, li = null) => ((li ? li.dataset.code : code) === actif ? surligner(null) : surligner(code, li));
+    communes.forEach((li) => li.addEventListener('click', (e) => { e.stopPropagation(); basculer(departement(li), li); }));
+    ORDRE.forEach((code) => couches[code].g.addEventListener('click', (e) => { e.stopPropagation(); basculer(code); }));
     section.addEventListener('click', () => surligner(null));
   } else {
-    $$('li', liste).forEach((li) => {
-      li.addEventListener('pointerenter', () => surligner(li.dataset.code));
+    communes.forEach((li) => {
+      li.addEventListener('pointerenter', () => surligner(departement(li), li));
       li.addEventListener('pointerleave', () => surligner(null));
     });
-    villes.forEach((v, c) => {
-      v.g.addEventListener('pointerenter', () => surligner(c));
-      v.g.addEventListener('pointerleave', () => surligner(null));
+    ORDRE.forEach((code) => {
+      couches[code].g.addEventListener('pointerenter', () => surligner(code));
+      couches[code].g.addEventListener('pointerleave', () => surligner(null));
     });
   }
 
@@ -311,21 +291,16 @@ function zone() {
   const jouer = () => {
     if (joue) return;
     joue = true;
-    villes.forEach(aplat);
-    if (reduit) { carte.classList.add('joue'); return; }
-    const parDistance = Z.villes.slice().sort((p, q) => p.km - q.km);
+    if (reduit) return;
     const tl = gsap.timeline({ onComplete: () => { pret = true; } });
     tl.to(['#zone-titre', '#zone-intro', '#zone-rayon'], { opacity: 1, duration: 0.35, ease: 'none', stagger: 0.08 }, 0)
-      .to($$('li', liste), { opacity: 1, duration: 0.3, ease: 'none', stagger: 0.04 }, 0.1)
-      .to(fond, { attr: { opacity: 1 }, duration: 0.6, ease: 'none' }, 0.1)
-      .to(traits, { attr: { 'stroke-dashoffset': 0 }, duration: 1, ease: 'power2.inOut', stagger: 0.15 }, 0.2)
-      .to(cercle, { attr: { 'stroke-dashoffset': 0 }, duration: 1.2, ease: 'power2.inOut' }, 0.4)
-      .to(tuiles, { attr: { opacity: TUILE }, duration: 0.6, ease: 'none', stagger: 0.15 }, 1.05)
-      .to([...numeros, km], { attr: { opacity: 1 }, duration: 0.3, ease: 'none' }, 1.4)
-      .call(() => carte.classList.add('joue'), null, 1.3); // le nom de Monistrol arrive avec son point
-    parDistance.forEach((v, i) => {
-      const p = villes.get(v.code);
-      tl.to(p.point, { attr: { r: repos(p) }, duration: 0.35, ease: 'back.out(2)' }, 1.3 + i * 0.06);
+      .to(communes, { opacity: 1, duration: 0.3, ease: 'none', stagger: 0.04 }, 0.1);
+    ORDRE.forEach((code, i) => {
+      const t = 0.1 + i * 0.55;
+      const c = couches[code];
+      tl.to(c.trait, { attr: { 'stroke-dashoffset': 0 }, duration: 0.85, ease: 'power2.inOut' }, t);
+      tl.to(c.image, { attr: { opacity: 1 }, duration: 0.45, ease: 'none' }, t + 0.62);
+      tl.to(c.texte, { attr: { opacity: 1 }, duration: 0.25, ease: 'none' }, t + 0.7);
     });
   };
   new IntersectionObserver(([e], obs) => {

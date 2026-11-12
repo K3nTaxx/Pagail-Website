@@ -361,28 +361,14 @@ dialog { color: var(--blanc); }
 .zone-rayon a { color: var(--blanc); white-space: nowrap; }
 .zone-rayon a:hover { color: var(--bleu-clair); }
 .js .zone-titre, .js .zone-intro, .js .zone-rayon, .js .zone-liste li { opacity: 0; }
-.zone-carte { display: block; width: 100%; height: auto; max-height: calc(100vh - var(--toit) - 3vw); overflow: hidden; }
-.zone-carte .voisins { stroke: #2C2C31; stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.zone-carte .trait { stroke: var(--blanc); stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.zone-carte .cercle { stroke: var(--bleu); stroke-width: 3; vector-effect: non-scaling-stroke; }
-.zone-carte text { font-family: 'Big Shoulders Display', Impact, sans-serif; font-weight: 900; fill: var(--blanc); text-transform: uppercase; }
-.zone-carte .numero { font-size: 118px; text-anchor: middle; dominant-baseline: central; }
-.zone-carte .km { font-size: 34px; font-weight: 800; fill: var(--bleu-clair); text-anchor: middle; dominant-baseline: central; }
-.zone-carte .ville { transition: opacity .25s linear; }
-.zone-carte .ville.efface { opacity: .45; }
-.zone-carte .cible { fill: transparent; }
-.zone-carte .point { fill: var(--blanc); }
-.zone-carte .centre .point { fill: var(--bleu); stroke: var(--blanc); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
-.zone-carte .ville.actif .point { fill: var(--bleu-clair); }
-.zone-carte .filet { stroke: var(--blanc); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
-.zone-carte:not(.joue) .filet { visibility: hidden; }
-/* Le nom d'une commune : sur un aplat noir, comme les titres des panneaux. Monistrol toujours, les autres au survol. */
-.zone-carte .nom { font-size: 30px; font-weight: 800; letter-spacing: .01em; pointer-events: none; }
-.zone-carte .fond-nom { fill: var(--noir); pointer-events: none; }
-.zone-carte .ville:not(.centre):not(.actif) :is(.nom, .fond-nom),
-.zone-carte:not(.joue) :is(.nom, .fond-nom) { visibility: hidden; }
-.zone-carte .centre .nom { font-size: 34px; }
-.zone-carte .centre .fond-nom { fill: var(--bleu); }
+/* La carte des quatre départements, celle d'avant le référencement. */
+.zone-carte { display: block; width: 100%; height: auto; max-height: calc(100vh - var(--toit) - 3vw); overflow: visible; }
+.zone-dessus { pointer-events: none; }
+.zone-carte .trait { stroke: var(--blanc); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.zone-carte text {
+  font: 900 104px 'Big Shoulders Display', Impact, sans-serif; fill: var(--blanc);
+  text-anchor: middle; dominant-baseline: central;
+}
 
 /* ———————————————— Avis ———————————————— */
 .avis {

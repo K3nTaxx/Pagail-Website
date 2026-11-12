@@ -193,11 +193,8 @@
   .zone-liste li { padding: .1em 0; }
   .zone-rayon { font-size: 14px; margin-top: 12px; max-width: none; }
   .zone-rayon a { padding-block: 11px; } /* une cible plus haute que la ligne, sans la déplacer */
-  .zone-carte { margin-top: 18px; max-height: none; }
-  .zone-carte .numero { font-size: 150px; }
-  .zone-carte .km { font-size: 50px; }
-  .zone-carte .nom { font-size: 50px; }
-  .zone-carte .centre .nom { font-size: 54px; }
+  .zone-carte { margin-top: 24px; max-height: none; }
+  .zone-carte text { font-size: 84px; }
 
   /* Avis */
   .avis { grid-template-columns: 1fr; gap: 28px; padding: var(--section) var(--m) 0; }
@@ -281,8 +278,6 @@
   .appel { left: 50%; }
   .zone { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: center; column-gap: 24px; padding-bottom: 8px; }
   .zone-carte { margin-top: 0; }
-  .zone-carte .nom { font-size: 34px; }
-  .zone-carte .centre .nom { font-size: 38px; }
   /* Couché, l'écran est trop bas pour le socle entier : seul le titre reste, à gauche de la barre d'appel. */
   .haut-socle { padding: 10px 50% calc(10px + env(safe-area-inset-bottom)) var(--m); }
   .haut-h1 { font-size: 17px; margin: 0; }
