@@ -2,12 +2,15 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>AD Couverture Rénove : un toit solide, un habitat protégé</title>
-  <meta name="description" content="Toiture, couverture, façades et peinture dans la Loire, la Haute-Loire, le Rhône et l’Isère. De père en fils, depuis 2011.">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Duculty Couverture | Couvreur à Monistrol-sur-Loire (43)</title>
+  <meta name="description" content="André Duculty, artisan couvreur à Monistrol-sur-Loire depuis 2011. Réfection de toiture, démoussage, zinguerie, façade et dépannage d’urgence. Devis gratuit au 06 68 19 26 36.">
+  <!--@meta-->
   <meta name="theme-color" content="#050507">
   <link rel="icon" type="image/png" href="/img/logo/favicon.png">
-  <link rel="preload" href="/img/haut/haut-2000.webp" as="image" imagesrcset="/img/haut/haut-1600.webp 1600w, /img/haut/haut-2000.webp 2000w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" href="/img/haut/demoussage-toiture-saint-romain-les-atheux-2000.webp" as="image" imagesrcset="/img/haut/demoussage-toiture-saint-romain-les-atheux-1600.webp 1600w, /img/haut/demoussage-toiture-saint-romain-les-atheux-2000.webp 2000w" imagesizes="100vw" fetchpriority="high" media="(min-width: 901px), (orientation: landscape)">
+  <link rel="preload" href="/img/tel/demoussage-toiture-saint-romain-les-atheux-960.webp" as="image" imagesrcset="/img/tel/demoussage-toiture-saint-romain-les-atheux-800.webp 800w, /img/tel/demoussage-toiture-saint-romain-les-atheux-960.webp 960w" imagesizes="100vw" fetchpriority="high" media="(max-width: 500px) and (orientation: portrait)">
+  <link rel="preload" href="/img/tel/demoussage-toiture-saint-romain-les-atheux-1200.webp" as="image" fetchpriority="high" media="(min-width: 501px) and (max-width: 900px) and (orientation: portrait)">
   <link rel="preload" href="/img/logo/logo-barre.webp" as="image" fetchpriority="high">
   <link rel="preload" href="/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/fonts/big-shoulders-display-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
@@ -16,51 +19,42 @@
   <style>html,body{background:#050507}</style>
   <script>history.scrollRestoration='manual';document.documentElement.classList.add('js');</script>
   <link rel="stylesheet" href="/src/styles/site.css">
+  <link rel="stylesheet" href="/src/styles/telephone.css">
   <script type="module" src="/src/main.js"></script>
+  <!--@schema-->
 </head>
 <body>
 
-<!-- La barre n'en est plus une : deux pentes de toit qui se rejoignent au-dessus du faîtage. -->
-<header class="barre">
-  <i class="barre-toit" aria-hidden="true"></i>
-  <a class="barre-logo" href="#haut" aria-label="AD Couverture Rénove, revenir en haut de page">
-    <img src="/img/logo/logo-barre.webp" width="450" height="218" alt="AD Couverture Rénove">
-  </a>
-  <div class="barre-actions">
-    <button class="barre-menu" type="button" id="menu-ouvrir" aria-haspopup="dialog" aria-expanded="false" aria-controls="menu">Menu</button>
-    <a class="barre-tel" href="tel:+33668192636" aria-label="Appeler le 06 68 19 26 36">06&nbsp;68&nbsp;19&nbsp;26&nbsp;36</a>
-    <a class="barre-devis" href="#devis">Demander un devis</a>
-  </div>
-</header>
+<!--@barre-->
 
-<!-- Menu : le toit descend sur la page, le bloc monte jusqu'en haut. Tout s'annule à la fermeture. -->
-<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
-  <div class="menu-fond"></div>
-  <nav class="menu-liens titre" aria-label="Navigation principale">
-    <a href="#prestations" data-vue="prestations"><span>Prestations</span></a>
-    <a href="#entreprise" data-vue="entreprise"><span>L’entreprise</span></a>
-    <a href="#facades" data-vue="facades"><span>Façades</span></a>
-    <a href="#chantiers" data-vue="chantiers"><span>Chantiers</span></a>
-    <a href="#zone" data-vue="zone"><span>Zone</span></a>
-    <a href="#devis" data-vue="devis"><span>Devis</span></a>
-  </nav>
-  <div class="menu-bloc" aria-hidden="true"><div class="menu-vues" id="menu-vues"></div></div>
-</div>
+<!--@appel-->
+
+<!--@menu-->
 
 <main>
 
-  <!-- Haut de page : tout s'organise autour du faîtage, au centre exact de l'écran. -->
+  <!-- Haut de page : tout s'organise autour du faîtage, au centre exact de l'écran.
+       Le socle, en bas, dit qui, quoi et où. -->
   <section class="haut" id="haut">
     <div class="haut-photo" id="haut-photo">
+      <picture>
+        <source media="(max-width: 500px) and (orientation: portrait)" srcset="/img/tel/demoussage-toiture-saint-romain-les-atheux-800.webp 800w, /img/tel/demoussage-toiture-saint-romain-les-atheux-960.webp 960w" sizes="100vw">
+        <source media="(min-width: 501px) and (max-width: 900px) and (orientation: portrait)" srcset="/img/tel/demoussage-toiture-saint-romain-les-atheux-1200.webp">
       <img id="haut-img"
-           src="/img/haut/haut-2000.webp"
-           srcset="/img/haut/haut-1600.webp 1600w, /img/haut/haut-2000.webp 2000w"
+           src="/img/haut/demoussage-toiture-saint-romain-les-atheux-2000.webp"
+           srcset="/img/haut/demoussage-toiture-saint-romain-les-atheux-1600.webp 1600w, /img/haut/demoussage-toiture-saint-romain-les-atheux-2000.webp 2000w"
            sizes="100vw" width="2000" height="1250" decoding="async" fetchpriority="high"
-           alt="Faîtage d’un toit en plein chantier : la tuile nettoyée à gauche, la mousse encore en place à droite.">
+           alt="Démoussage d’une toiture à Saint-Romain-les-Atheux : la tuile nettoyée à gauche du faîtage, la mousse encore en place à droite.">
+      </picture>
       <canvas id="haut-eau" aria-hidden="true"></canvas>
       <i class="volet" id="haut-volet"></i>
     </div>
-    <h1 class="haut-titre titre" aria-label="Un toit solide, un habitat protégé">
+    <div class="haut-socle">
+      <h1 class="haut-h1 titre"><span>Duculty Couverture,</span> <span>couvreur à Monistrol-sur-Loire et alentours</span></h1>
+      <p class="haut-intro">Duculty Couverture est l’entreprise d’André Duculty, artisan couvreur depuis 2011. Toiture, couverture, façades, peinture et dépannage en urgence&nbsp;: il intervient à Monistrol-sur-Loire et dans un rayon de 40&nbsp;km.</p>
+    </div>
+    <p class="haut-titre titre">
+      <span class="lecteur">Un toit solide, un habitat protégé.</span>
       <span class="pente pente-g" aria-hidden="true">
         <span class="mot"><span>Un toit</span></span>
         <span class="mot"><span>un habitat</span></span>
@@ -69,59 +63,60 @@
         <span class="mot"><span>solide<b class="virgule">,</b></span></span>
         <span class="mot"><span>protégé</span></span>
       </span>
-    </h1>
+    </p>
   </section>
 
-  <!-- Prestations -->
+  <!-- Prestations : la phrase de chaque panneau mène à la page de la prestation. -->
   <section class="prestations" id="prestations" data-section>
+    <h2 class="lecteur">Prestations</h2>
     <div class="panneaux" id="panneaux">
 
-      <article class="panneau" data-prestation="Toiture" data-focale="0.72" tabindex="0">
-        <figure class="panneau-photo" data-volet><img data-src="/img/panneaux/toiture.webp" width="1100" height="1000" alt="Nettoyage d’une toiture au jet : la mousse encore noire devant le couvreur, la tuile orange derrière."><i class="volet"></i></figure>
+      <article class="panneau" data-prestation="Toiture" data-focale-tel="0.55" data-focale="0.72" tabindex="0">
+        <figure class="panneau-photo" data-volet><img data-src-tel="/img/tel/panneaux/nettoyage-toiture-sainte-sigolene.webp" data-src="/img/panneaux/nettoyage-toiture-sainte-sigolene.webp" width="1100" height="1000" alt="Nettoyage d’une toiture au jet à Sainte-Sigolène : la mousse encore noire devant le couvreur, la tuile orange derrière."><i class="volet"></i></figure>
         <i class="panneau-voile"></i>
-        <h2 class="panneau-titre titre" data-fondu>Toiture</h2>
+        <h3 class="panneau-titre titre" data-fondu>Toiture</h3>
         <div class="panneau-info">
-          <p>Nettoyage, démoussage, traitement antimousse, hydrofuge, résine colorée ou incolore.</p>
+          <p><a href="/prestations/nettoyage-demoussage-toiture-monistrol-sur-loire/">Nettoyage, démoussage, traitement antimousse</a>, <a href="/prestations/traitement-hydrofuge-resine-toiture-monistrol-sur-loire/">hydrofuge, résine colorée ou incolore</a>.</p>
           <a class="bouton" href="#devis" data-prestation-devis="Toiture">Demander un devis</a>
         </div>
       </article>
 
-      <article class="panneau" data-prestation="Couverture" data-focale="0.6" tabindex="0">
-        <figure class="panneau-photo" data-volet><img data-src="/img/panneaux/couverture.webp" width="1100" height="1000" alt="Couverture en bac acier gris anthracite, vue depuis le toit, le pied du couvreur dans le cadre."><i class="volet"></i></figure>
+      <article class="panneau" data-prestation="Couverture" data-focale-tel="0.49" data-focale="0.6" tabindex="0">
+        <figure class="panneau-photo" data-volet><img data-src-tel="/img/tel/panneaux/couverture-bac-acier-marlhes.webp" data-src="/img/panneaux/couverture-bac-acier-marlhes.webp" width="1100" height="1000" alt="Couverture en bac acier gris anthracite à Marlhes, vue depuis le toit, le pied du couvreur dans le cadre."><i class="volet"></i></figure>
         <i class="panneau-voile"></i>
-        <h2 class="panneau-titre titre" data-fondu>Couverture</h2>
+        <h3 class="panneau-titre titre" data-fondu>Couverture</h3>
         <div class="panneau-info">
-          <p>Remplacement de la toiture, du&nbsp;pare-vapeur et des liteaux, changement de charpente si&nbsp;nécessaire.</p>
+          <p><a href="/prestations/refection-de-toiture-monistrol-sur-loire/">Remplacement de la toiture, du&nbsp;pare-vapeur et des liteaux, changement de charpente si&nbsp;nécessaire</a>.</p>
           <a class="bouton" href="#devis" data-prestation-devis="Couverture">Demander un devis</a>
         </div>
       </article>
 
-      <article class="panneau" data-prestation="Façades" data-focale="0.42" data-voile="0.46" tabindex="0">
-        <figure class="panneau-photo" data-volet><img data-src="/img/panneaux/facades.webp" width="1100" height="1000" alt="Façade blanche en cours de rénovation, échafaudage monté contre le mur."><i class="volet"></i></figure>
+      <article class="panneau" data-prestation="Façades" data-focale-tel="0.25" data-focale="0.42" data-voile="0.46" tabindex="0">
+        <figure class="panneau-photo" data-volet><img data-src-tel="/img/tel/panneaux/renovation-facade-aurec-sur-loire.webp" data-src="/img/panneaux/renovation-facade-aurec-sur-loire.webp" width="1100" height="1000" alt="Façade blanche en cours de rénovation à Aurec-sur-Loire, échafaudage monté contre le mur."><i class="volet"></i></figure>
         <i class="panneau-voile"></i>
-        <h2 class="panneau-titre titre" data-fondu>Façades</h2>
+        <h3 class="panneau-titre titre" data-fondu>Façades</h3>
         <div class="panneau-info">
-          <p>Nettoyage, rénovation, peinture extérieure, crépis, joints apparents.</p>
+          <p><a href="/prestations/renovation-peinture-facade-monistrol-sur-loire/">Nettoyage, rénovation, peinture extérieure, crépis, joints apparents</a>.</p>
           <a class="bouton" href="#devis" data-prestation-devis="Façades">Demander un devis</a>
         </div>
       </article>
 
-      <article class="panneau" data-prestation="Peinture" data-focale="0.62" data-voile="0.46" tabindex="0">
-        <figure class="panneau-photo" data-volet><img data-src="/img/panneaux/peinture.webp" width="1100" height="1000" alt="Maison repeinte en blanc aux volets vert clair, une échelle encore posée contre le mur."><i class="volet"></i></figure>
+      <article class="panneau" data-prestation="Peinture" data-focale-tel="0.37" data-focale="0.62" data-voile="0.46" tabindex="0">
+        <figure class="panneau-photo" data-volet><img data-src-tel="/img/tel/panneaux/peinture-facade-saint-didier-en-velay.webp" data-src="/img/panneaux/peinture-facade-saint-didier-en-velay.webp" width="1100" height="1000" alt="Maison repeinte en blanc aux volets vert clair à Saint-Didier-en-Velay, une échelle encore posée contre le mur."><i class="volet"></i></figure>
         <i class="panneau-voile"></i>
-        <h2 class="panneau-titre titre" data-fondu>Peinture</h2>
+        <h3 class="panneau-titre titre" data-fondu>Peinture</h3>
         <div class="panneau-info">
-          <p>Travaux de peinture intérieure et&nbsp;extérieure.</p>
+          <p><a href="/prestations/renovation-peinture-facade-monistrol-sur-loire/">Travaux de peinture intérieure et&nbsp;extérieure</a>.</p>
           <a class="bouton" href="#devis" data-prestation-devis="Peinture">Demander un devis</a>
         </div>
       </article>
 
-      <article class="panneau" data-prestation="Entretien" data-focale="1" tabindex="0">
-        <figure class="panneau-photo" data-volet><img data-src="/img/panneaux/entretien.webp" width="1100" height="1000" alt="Chéneau encaissé en zinc entre la toiture en tuiles et le mur."><i class="volet"></i></figure>
+      <article class="panneau" data-prestation="Entretien" data-focale-tel="0.51" data-focale="1" tabindex="0">
+        <figure class="panneau-photo" data-volet><img data-src-tel="/img/tel/panneaux/cheneau-zinc-saint-didier-en-velay.webp" data-src="/img/panneaux/cheneau-zinc-saint-didier-en-velay.webp" width="1100" height="1000" alt="Chéneau encaissé en zinc entre la toiture en tuiles et le mur, à Saint-Didier-en-Velay."><i class="volet"></i></figure>
         <i class="panneau-voile"></i>
-        <h2 class="panneau-titre titre" data-fondu>Entretien</h2>
+        <h3 class="panneau-titre titre" data-fondu>Entretien</h3>
         <div class="panneau-info">
-          <p>Nettoyage des chéneaux et des&nbsp;gouttières.</p>
+          <p><a href="/prestations/zinguerie-gouttieres-monistrol-sur-loire/">Zinguerie, nettoyage des chéneaux et des&nbsp;gouttières</a>.</p>
           <a class="bouton" href="#devis" data-prestation-devis="Entretien">Demander un devis</a>
         </div>
       </article>
@@ -133,7 +128,7 @@
   <!-- L'entreprise : une maison. Le titre dans le ciel, le camion en façade, les valeurs en socle. -->
   <section class="entreprise" id="entreprise" data-section>
     <figure class="entreprise-photo" data-volet>
-      <img data-src="/img/entreprise/camion.webp" width="2000" height="1694" alt="Le camion benne de l’entreprise, grue dépliée sur un chantier, le logo AD Couverture Rénove sur la benne et la portière.">
+      <img data-src-tel="/img/tel/camion-duculty-couverture.webp" data-src="/img/entreprise/camion-duculty-couverture.webp" width="2000" height="1694" alt="Le camion de Duculty Couverture sur un chantier, grue dépliée.">
       <i class="volet"></i>
     </figure>
     <h2 class="entreprise-titre titre" aria-label="De père en fils">
@@ -152,21 +147,25 @@
     </div>
   </section>
 
-  <!-- Façades -->
+  <!-- Façades : avant, après, sur le même chantier à Retournac. -->
   <section class="facade" id="facades" data-section>
     <div class="facade-texte">
       <h2 class="facade-titre titre" data-fondu>Façades, <span id="facade-mot">après.</span></h2>
       <button class="bouton bouton-grand facade-bouton" id="facade-bouton" type="button" data-fondu>Maintenir pour voir l’avant</button>
     </div>
     <figure class="facade-photos" id="facade-photos" data-volet>
-      <img class="facade-avant" id="facade-avant" data-src="/img/facade/facade-avant.webp" width="1800" height="1889" alt="La façade avant les travaux : enduit brun, encadrements gris." draggable="false">
-      <img class="facade-apres" data-src="/img/facade/facade-apres.webp" width="1800" height="1889" alt="La même façade après les travaux : enduit clair, encadrements blancs." draggable="false">
+      <img class="facade-avant" id="facade-avant" data-src-tel="/img/tel/renovation-facade-retournac-avant.webp" data-src="/img/facade/renovation-facade-retournac-avant.webp" width="1800" height="1889" alt="Façade à Retournac avant la rénovation : enduit brun, encadrements gris." draggable="false">
+      <img class="facade-apres" data-src-tel="/img/tel/renovation-facade-retournac-apres.webp" data-src="/img/facade/renovation-facade-retournac-apres.webp" width="1800" height="1889" alt="La même façade à Retournac après la rénovation : enduit clair, encadrements blancs." draggable="false">
       <i class="volet"></i>
     </figure>
   </section>
 
   <!-- Le mur de chantiers -->
   <section class="mur" id="chantiers" data-mur>
+    <div class="mur-entete">
+      <h2 class="titre">Chantiers</h2>
+      <p>Glisser pour parcourir</p>
+    </div>
     <div class="mur-vue" id="mur-vue">
       <div class="mur-monde" id="mur-monde"></div>
     </div>
@@ -187,24 +186,36 @@
   <section class="urgence" id="urgence" data-section>
     <h2 class="urgence-titre titre" data-fondu>Urgence et dépannage, 24&nbsp;h/24, 7&nbsp;j/7</h2>
     <a class="urgence-tel titre" href="tel:+33668192636" aria-label="Appeler le 06 68 19 26 36" data-fondu>06&nbsp;68&nbsp;19&nbsp;26&nbsp;36</a>
+    <a class="urgence-lien" href="/prestations/depannage-toiture-urgence-monistrol-sur-loire/" data-fondu>Dépannage toiture en urgence</a>
   </section>
 
-  <!-- Zone : les contours se tracent seuls à l'arrivée. Le survol ne fait rien. -->
+  <!-- Zones d'intervention : le cercle des 40 km se trace à l'arrivée, chaque commune s'allume au survol. -->
   <section class="zone" id="zone">
     <div class="zone-liste">
-      <p class="zone-intro" id="zone-intro">Nous intervenons dans</p>
+      <h2 class="zone-titre titre" id="zone-titre">Zones d’intervention</h2>
+      <p class="zone-intro" id="zone-intro">Duculty Couverture intervient à Monistrol-sur-Loire et dans un rayon de 40&nbsp;km.</p>
       <ul class="titre" id="zone-noms">
-        <li data-dep="42">la Loire</li>
-        <li data-dep="43">la Haute-Loire</li>
-        <li data-dep="69">le Rhône</li>
-        <li data-dep="38">l’Isère</li>
+        <li data-code="43137">Monistrol-sur-Loire</li>
+        <li data-code="43020">Bas-en-Basset</li>
+        <li data-code="43224">Sainte-Sigolène</li>
+        <li data-code="43177">Saint-Didier-en-Velay</li>
+        <li data-code="43012">Aurec-sur-Loire</li>
+        <li data-code="43268">Yssingeaux</li>
+        <li data-code="43087">Dunières</li>
+        <li data-code="43162">Retournac</li>
+        <li data-code="43205">Saint-Just-Malmont</li>
+        <li data-code="42095">Firminy</li>
+        <li data-code="42218">Saint-Étienne</li>
+        <li data-code="42005">Andrézieux-Bouthéon</li>
+        <li data-code="43157">Le Puy-en-Velay</li>
       </ul>
+      <p class="zone-rayon" id="zone-rayon">Votre commune n’est pas dans la liste&nbsp;? Si elle est dans le cercle, appeler le <a href="tel:+33668192636">06&nbsp;68&nbsp;19&nbsp;26&nbsp;36</a>.</p>
     </div>
-    <svg class="zone-carte" id="zone-carte" role="img" aria-label="Carte des quatre départements : Loire 42, Haute-Loire 43, Rhône 69, Isère 38." fill="none"></svg>
+    <svg class="zone-carte" id="zone-carte" role="img" aria-label="Carte : un cercle de 40 km autour de Monistrol-sur-Loire, sur la Haute-Loire (43) et la Loire (42), avec les communes de la liste." fill="none"></svg>
   </section>
 
-  <!-- Avis Google : masqué tant que /donnees/avis.json est vide. Aucun avis n'est inventé. -->
-  <section class="avis" id="avis" hidden></section>
+  <!-- Avis Google : masqué tant qu'il n'y a ni fiche Google (entreprise.json) ni avis (/donnees/avis.json). Aucun avis n'est inventé. -->
+  <section class="avis" id="avis" aria-label="Avis Google" hidden></section>
 
   <!-- Devis -->
   <section class="devis" id="devis" data-section>
@@ -247,52 +258,11 @@
 
 </main>
 
-<footer class="pied">
-  <img class="pied-logo" data-src="/img/logo/logo-complet.webp" width="488" height="342" alt="Logo AD Couverture Rénove">
-  <div class="pied-contact">
-    <a href="tel:+33668192636">06&nbsp;68&nbsp;19&nbsp;26&nbsp;36</a>
-    <a href="mailto:Entducultyrenov@gmail.com">Entducultyrenov@gmail.com</a>
-  </div>
-  <button type="button" class="lien pied-legal" data-mentions>Mentions légales</button>
-</footer>
+<!--@pied-->
 
-<!-- Mentions légales -->
-<dialog class="mentions" id="mentions" aria-labelledby="mentions-titre">
-  <div class="mentions-corps">
-    <button class="mentions-fermer" type="button" data-fermer>Fermer</button>
-    <h2 class="titre" id="mentions-titre">Mentions légales</h2>
-    <div class="mentions-colonnes">
-      <div>
-        <h3>Éditeur du site</h3>
-        <p>Duculty André, artisan, auto-entrepreneur.<br>AD Couverture Rénove.<br>4 chemin de la Collange, <mark>[À FOURNIR : code postal et ville]</mark><br>SIRET 537&nbsp;928&nbsp;061&nbsp;00036. APE 4391B.<br>Téléphone&nbsp;: 06&nbsp;68&nbsp;19&nbsp;26&nbsp;36.<br>E-mail&nbsp;: Entducultyrenov@gmail.com.</p>
-        <h3>Directeur de la publication</h3>
-        <p>André Duculty.</p>
-        <h3>Assurance</h3>
-        <p>MW Assurance, garantie décennale.<br>Numéro de police&nbsp;: <mark>[À FOURNIR]</mark></p>
-      </div>
-      <div>
-        <h3>Hébergeur</h3>
-        <p>Netlify, Inc., 101 2nd Street, San Francisco, CA&nbsp;94105, États-Unis.</p>
-        <h3>Vos données</h3>
-        <p>Le formulaire recueille votre nom, votre commune, votre téléphone, votre e-mail et votre message. Ces données servent uniquement à répondre à votre demande de devis. Elles ne sont ni vendues ni cédées. Pour les consulter, les corriger ou les faire supprimer, écrire à Entducultyrenov@gmail.com.</p>
-        <h3>Photos et crédits</h3>
-        <p>Toutes les photos sont des photos de chantier de l’entreprise. Contours des départements&nbsp;: <a href="https://github.com/gregoiredavid/france-geojson" rel="noopener">france-geojson</a> de Grégoire David, d’après IGN Admin Express, Licence Ouverte Etalab. Polices&nbsp;: Big Shoulders Display et Familjen Grotesk, licence SIL Open Font.</p>
-      </div>
-    </div>
-  </div>
-</dialog>
+<!--@mentions-->
 
-<!-- Chantier en grand -->
-<dialog class="visionneuse" id="visionneuse" aria-label="Chantier en grand">
-  <div class="visionneuse-photo" id="visionneuse-photo"></div>
-  <button class="visionneuse-zone visionneuse-prec" id="visionneuse-prec" type="button" aria-label="Voir la photo précédente"></button>
-  <button class="visionneuse-zone visionneuse-suiv" id="visionneuse-suiv" type="button" aria-label="Voir la photo suivante"></button>
-  <div class="visionneuse-haut">
-    <p class="visionneuse-titre titre" id="visionneuse-titre"></p>
-    <button class="visionneuse-fermer" type="button" data-fermer autofocus>Fermer</button>
-  </div>
-  <div class="visionneuse-traits" id="visionneuse-traits"></div>
-</dialog>
+<!--@visionneuse-->
 
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* AD Couverture Rénove — « Aucun montage »
+/* Duculty Couverture — « Aucun montage »
    Noir, un seul bleu en aplats, la tuile pour seule matière spectaculaire.
    Ordinateur uniquement : 1440 à 1920 px. Tailles en vw bornées par vh pour tenir sur un écran. */
 
@@ -83,6 +83,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .bouton-grand { font-size: 1.14em; padding: .9em 1.2em; }
 .lien { text-decoration: underline; text-underline-offset: .18em; }
 .lien:hover { color: var(--bleu-clair); }
+/* Lu par les lecteurs d'écran et les moteurs, invisible à l'écran. */
+.lecteur { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
 
 /* Le titre sur les pentes : les lettres restent verticales, les lignes suivent la pente du toit,
    exactement le même angle que la barre. Chaque mot sort de derrière le faîtage. */
@@ -152,6 +154,17 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 .haut-titre .pente-g .mot:nth-child(2) { margin-right: calc(var(--d2) - .006em); } /* T */
 .haut-titre .pente-d .mot:nth-child(1) { margin-left: calc(var(--d1) - .025em); }  /* S */
 .haut-titre .pente-d .mot:nth-child(2) { margin-left: calc(var(--d2) - .04em); }   /* P */
+/* Le socle : qui, quoi, où. Un aplat noir sous la photo, comme le socle de la maison plus bas. */
+.haut-socle {
+  position: absolute; z-index: 4; left: 0; right: 0; bottom: 0;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 5vw;
+  padding: 1.1vw var(--m) 1.2vw;
+  background: var(--noir);
+}
+.js .haut-socle { visibility: hidden; }
+.haut-h1 { font-size: min(2vw, 3.5vh); line-height: .98; margin-left: -.03em; white-space: nowrap; }
+.haut-h1 span { display: block; }
+.haut-intro { max-width: 38em; font-size: .92em; line-height: 1.34; text-wrap: pretty; }
 
 /* ———————————————— Prestations ———————————————— */
 .prestations {
@@ -191,6 +204,8 @@ button { font: inherit; color: inherit; background: none; border: 0; padding: 0;
 }
 .panneau-info p { font-size: 1.04em; line-height: 1.28; text-wrap: pretty; }
 .panneau-info .bouton { flex: none; }
+.panneau-info p a { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em; }
+.panneau-info p a:hover { color: var(--bleu-clair); }
 .prestations-pied {
   position: absolute; left: var(--m); right: var(--m); bottom: 0; height: var(--pied-p);
   display: flex; align-items: center; line-height: 1.15;
@@ -320,29 +335,54 @@ dialog { color: var(--blanc); }
 .urgence-titre { font-size: 4.4vw; white-space: nowrap; margin-left: -.031em; }
 .urgence-tel { display: block; font-size: 13vw; line-height: .86; white-space: nowrap; align-self: flex-end; letter-spacing: 0; margin-right: -.033em; }
 .urgence-tel:focus-visible { outline-color: var(--blanc); }
+.urgence-lien {
+  position: absolute; left: var(--m); bottom: 2.3vw;
+  font-weight: 500; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: .2em;
+}
+.urgence-lien:hover { color: var(--noir); }
+.urgence-lien:focus-visible { outline-color: var(--blanc); }
 
-/* ———————————————— Zone ———————————————— */
+/* ———————————————— Zones d'intervention ———————————————— */
 .zone {
   position: relative; min-height: 100vh; overflow: hidden; background: var(--noir);
   display: grid; grid-template-columns: 39vw 1fr; align-items: center; column-gap: 1vw;
   padding: var(--toit) var(--m) 3vw;
 }
-.zone-intro { font-size: 1.5em; line-height: 1.2; margin-bottom: .55em; }
-.zone-liste ul { font-size: min(6.2vw, 11vh); line-height: 1.04; }
+.zone-titre { font-size: min(4.4vw, 7.6vh); line-height: .92; margin: 0 0 .34em -.035em; }
+.zone-intro { font-size: 1.1em; line-height: 1.3; margin-bottom: 1.05em; max-width: 25em; }
+.zone-liste ul { font-size: min(2.3vw, 3.9vh); line-height: 1.04; }
 .zone-liste li {
-  white-space: nowrap; width: fit-content; cursor: default; margin-left: -.04em;
+  white-space: nowrap; width: fit-content; cursor: default; margin-left: -.03em;
   transition: color .28s linear, transform .55s cubic-bezier(.2, .8, .2, 1);
 }
 .zone-liste ul.survol li { color: #48484D; }
 .zone-liste ul.survol li.actif { color: var(--blanc); transform: translateX(.14em); }
-.js .zone-intro, .js .zone-liste li { opacity: 0; }
-.zone-carte { display: block; width: 100%; height: auto; max-height: calc(100vh - var(--toit) - 3vw); overflow: visible; }
-.zone-dessus { pointer-events: none; }
-.zone-carte .trait { stroke: var(--blanc); stroke-width: 2.5; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.zone-carte text {
-  font: 900 104px 'Big Shoulders Display', Impact, sans-serif; fill: var(--blanc);
-  text-anchor: middle; dominant-baseline: central;
-}
+.zone-rayon { margin-top: 1.15em; font-size: .92em; line-height: 1.34; color: var(--gris); max-width: 27em; }
+.zone-rayon a { color: var(--blanc); white-space: nowrap; }
+.zone-rayon a:hover { color: var(--bleu-clair); }
+.js .zone-titre, .js .zone-intro, .js .zone-rayon, .js .zone-liste li { opacity: 0; }
+.zone-carte { display: block; width: 100%; height: auto; max-height: calc(100vh - var(--toit) - 3vw); overflow: hidden; }
+.zone-carte .voisins { stroke: #2C2C31; stroke-width: 1.2; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.zone-carte .trait { stroke: var(--blanc); stroke-width: 1.6; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
+.zone-carte .cercle { stroke: var(--bleu); stroke-width: 3; vector-effect: non-scaling-stroke; }
+.zone-carte text { font-family: 'Big Shoulders Display', Impact, sans-serif; font-weight: 900; fill: var(--blanc); text-transform: uppercase; }
+.zone-carte .numero { font-size: 118px; text-anchor: middle; dominant-baseline: central; }
+.zone-carte .km { font-size: 34px; font-weight: 800; fill: var(--bleu-clair); text-anchor: middle; dominant-baseline: central; }
+.zone-carte .ville { transition: opacity .25s linear; }
+.zone-carte .ville.efface { opacity: .45; }
+.zone-carte .cible { fill: transparent; }
+.zone-carte .point { fill: var(--blanc); }
+.zone-carte .centre .point { fill: var(--bleu); stroke: var(--blanc); stroke-width: 2.5; vector-effect: non-scaling-stroke; }
+.zone-carte .ville.actif .point { fill: var(--bleu-clair); }
+.zone-carte .filet { stroke: var(--blanc); stroke-width: 1.5; vector-effect: non-scaling-stroke; }
+.zone-carte:not(.joue) .filet { visibility: hidden; }
+/* Le nom d'une commune : sur un aplat noir, comme les titres des panneaux. Monistrol toujours, les autres au survol. */
+.zone-carte .nom { font-size: 30px; font-weight: 800; letter-spacing: .01em; pointer-events: none; }
+.zone-carte .fond-nom { fill: var(--noir); pointer-events: none; }
+.zone-carte .ville:not(.centre):not(.actif) :is(.nom, .fond-nom),
+.zone-carte:not(.joue) :is(.nom, .fond-nom) { visibility: hidden; }
+.zone-carte .centre .nom { font-size: 34px; }
+.zone-carte .centre .fond-nom { fill: var(--bleu); }
 
 /* ———————————————— Avis ———————————————— */
 .avis {
@@ -403,15 +443,24 @@ dialog { color: var(--blanc); }
 .devis-form .bouton[disabled] { background: var(--noir); color: var(--blanc); cursor: progress; }
 .devis .bouton:hover { background: var(--noir); color: var(--blanc); }
 
-/* ———————————————— Pied de page ———————————————— */
-.pied {
-  background: var(--noir); padding: 0 var(--m); height: var(--pied-h);
-  display: grid; grid-template-columns: auto 1fr auto; column-gap: 3vw; align-items: center;
-  font-size: .92em;
+/* ———————————————— Pied de page : le nom, la zone, le numéro, puis les prestations ———————————————— */
+.pied { background: var(--noir); padding: 0 var(--m); font-size: .92em; }
+.pied-ligne {
+  height: var(--pied-h);
+  display: grid; grid-template-columns: auto auto 1fr auto; column-gap: 3vw; align-items: center;
 }
 .pied-logo { width: 104px; height: auto; }
+.pied-nap { line-height: 1.3; }
+.pied-nom { font-weight: 600; }
+.pied-nap p + p { color: var(--gris); }
 .pied-contact { display: flex; gap: 2.4vw; }
 .pied-contact a[href^="mailto"]:hover { color: var(--bleu-clair); }
+.pied-services {
+  display: flex; flex-wrap: wrap; gap: .4em 2.2vw;
+  padding: 1.05vw 0 1.3vw; border-top: 1px solid #1C1C20; color: var(--gris);
+}
+.pied-services a:hover { color: var(--blanc); }
+.pied-services .pied-avis { color: var(--bleu-clair); margin-left: auto; }
 
 /* ———————————————— Menu ———————————————— */
 .menu { position: fixed; inset: 0; z-index: 45; }
@@ -451,7 +500,7 @@ dialog { color: var(--blanc); }
 .mentions-fermer:hover { background: var(--bleu); }
 
 @media (prefers-reduced-motion: reduce) {
-  .js [data-fondu], .js .zone-intro, .js .zone-liste li { opacity: 1; }
+  .js [data-fondu], .js .zone-titre, .js .zone-intro, .js .zone-rayon, .js .zone-liste li { opacity: 1; }
   .js .mot > span { visibility: visible; }
   .volet { display: none; }
 }

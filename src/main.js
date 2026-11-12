@@ -1,114 +1,33 @@
-import Lenis from 'lenis';
+// L'accueil.
 import { gsap } from 'gsap';
 import { mouillerLaTuile } from './modules/mouille.js';
 import { creerMur } from './modules/mur.js';
-import donnees from './data/chantiers.json';
-import zone from './data/zone.json';
-
-const $ = (s, r = document) => r.querySelector(s);
-const $$ = (s, r = document) => [...r.querySelectorAll(s)];
-const reduit = matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-/* ———————— Défilement ———————— */
-const lenis = reduit ? null : new Lenis({ lerp: 0.12, wheelMultiplier: 0.9, smoothWheel: true });
-if (lenis) {
-  gsap.ticker.add((t) => lenis.raf(t * 1000));
-  gsap.ticker.lagSmoothing(0);
-}
-function allerA(cible) {
-  const el = typeof cible === 'string' ? $(cible) : cible;
-  if (!el) return;
-  if (lenis) lenis.scrollTo(el, { duration: 1.1, force: true });
-  else window.scrollTo(0, el.getBoundingClientRect().top + scrollY);
-}
-document.addEventListener('click', (e) => {
-  const lien = e.target.closest('a[href^="#"]');
-  if (!lien) return;
-  e.preventDefault();
-  allerA(lien.getAttribute('href'));
-});
-
-/* ———————— Chargement des images : deux écrans à l'avance, décodées avant d'arriver ———————— */
-const pretes = new WeakMap();
-function charger(img) {
-  if (pretes.has(img)) return pretes.get(img);
-  const promesse = new Promise((resolve) => {
-    if (img.dataset.srcset) img.srcset = img.dataset.srcset;
-    if (img.dataset.src) img.src = img.dataset.src;
-    const decoder = () => (img.decode ? img.decode().catch(() => {}) : Promise.resolve()).then(resolve);
-    if (img.complete && img.naturalWidth) decoder();
-    else {
-      img.addEventListener('load', decoder, { once: true });
-      img.addEventListener('error', () => resolve(), { once: true });
-    }
-  });
-  pretes.set(img, promesse);
-  return promesse;
-}
-const prechargeur = new IntersectionObserver((entrees) => {
-  entrees.forEach((e) => {
-    if (!e.isIntersecting) return;
-    prechargeur.unobserve(e.target);
-    $$('img[data-src]:not([data-differe])', e.target).forEach(charger);
-  });
-}, { rootMargin: '200% 0px' });
-new IntersectionObserver((entrees, obs) => {
-  if (entrees[0].isIntersecting) { obs.disconnect(); charger($('.pied-logo')); }
-}, { rootMargin: '100% 0px' }).observe($('.pied'));
-
-/* ———————— Le titre sur les pentes : chaque mot sort de derrière le faîtage ———————— */
-function sortirDuFaitage(racine, delai = 0) {
-  const g = $$('.pente-g .mot > span', racine);
-  const d = $$('.pente-d .mot > span', racine);
-  if (!g.length && !d.length) return;
-  gsap.set([...g, ...d], { visibility: 'visible' });
-  if (reduit) return;
-  gsap.fromTo(g, { xPercent: 104 }, { xPercent: 0, duration: 1.05, ease: 'power3.out', delay: delai, stagger: 0.09 });
-  gsap.fromTo(d, { xPercent: -104 }, { xPercent: 0, duration: 1.05, ease: 'power3.out', delay: delai, stagger: 0.09 });
-}
-
-/* ———————— Le langage d'animation : volet qui se relève, texte en court fondu. Une seule fois. ———————— */
-function reveler(section) {
-  const volets = $$(':scope [data-volet] > .volet, :scope > .volet', section);
-  const fondus = $$('[data-fondu]', section);
-  const images = $$('img[data-src]', section).filter((i) => i.closest('[data-volet]'));
-  const attente = Promise.all(images.map(charger));
-  // On attend le décodage : jamais une image après son titre, jamais de case vide.
-  Promise.race([attente, new Promise((r) => setTimeout(r, 1500))]).then(() => {
-    sortirDuFaitage(section, 0.12);
-    if (reduit) {
-      volets.forEach((v) => v.remove());
-      gsap.set(fondus, { opacity: 1 });
-      return;
-    }
-    if (volets.length) {
-      gsap.to(volets, {
-        scaleY: 0, duration: 0.85, ease: 'power3.inOut', stagger: 0.07,
-        onComplete: () => volets.forEach((v) => v.remove()),
-      });
-    }
-    if (fondus.length) gsap.to(fondus, { opacity: 1, duration: 0.42, ease: 'none', delay: 0.14, stagger: 0.035 });
-  });
-}
-const arrivee = new IntersectionObserver((entrees) => {
-  entrees.forEach((e) => {
-    if (!e.isIntersecting) return;
-    arrivee.unobserve(e.target);
-    reveler(e.target);
-  });
-}, { rootMargin: '-14% 0px -14% 0px' });
+import { telephone } from './modules/appareil.js';
+import { $, $$, reduit, lenis, allerA, liensInternes, charger, prechargeur, piedDePage, sortirDuFaitage, arrivee } from './modules/commun.js';
+import { creerMenu } from './modules/menu.js';
+import { mentions, barresTelephone, visionneuse, preparerNette, maintenir } from './modules/fenetres.js';
+import Z from './data/zone.json';
+import E from './data/entreprise.json';
 
 /* ———————— L'ouverture : tout attend en coulisses, puis tout part dans la même image ———————— */
 async function demarrerHaut() {
   lenis?.stop();
+  // Arrivée depuis une page prestation sur une section (/#devis…) : on y va directement, sans l'ouverture.
+  const ancre = location.hash.length > 1 ? document.getElementById(decodeURIComponent(location.hash.slice(1))) : null;
+  const direct = !!ancre && ancre.id !== 'haut';
   window.scrollTo(0, 0);
   const barre = $('.barre');
   const volet = $('#haut-volet');
   const logo = $('.barre-logo img');
   const attendre = (ms) => new Promise((r) => setTimeout(r, ms));
+  const socle = $('.haut-socle');
 
   // Si le réseau est lent, le numéro de téléphone n'attend pas la photo.
-  const montrerBarre = () => { barre.style.visibility = 'visible'; };
+  const montrerBarre = () => {
+    barre.style.visibility = 'visible';
+    socle.style.visibility = 'visible';
+    if (telephone) $('#appel').classList.remove('appel-cachee');
+  };
   const secours = setTimeout(montrerBarre, 1500);
 
   const polices = Promise.all([
@@ -116,29 +35,30 @@ async function demarrerHaut() {
     '500 20px "Familjen Grotesk"', '600 20px "Familjen Grotesk"',
   ].map((p) => document.fonts.load(p, 'Éa0'))).catch(() => {});
   await Promise.all([
-    charger($('#haut-img')),
+    direct ? null : charger($('#haut-img')),
     Promise.race([polices, attendre(900)]),
     logo.decode ? logo.decode().catch(() => {}) : null,
   ]);
   const eau = mouillerLaTuile({ conteneur: $('#haut-photo'), image: $('#haut-img'), canvas: $('#haut-eau') });
-  if (eau) await eau.pret; // shaders compilés et texture envoyée, encore sous le noir
+  if (eau && !direct) await eau.pret; // shaders compilés et texture envoyée, encore sous le noir
 
   clearTimeout(secours);
   const dejaVue = barre.style.visibility === 'visible';
   montrerBarre();
-  if (!reduit && !dejaVue) gsap.fromTo(['.barre-logo', '.barre-actions'], { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'none', clearProps: 'opacity' });
-  if (reduit) { volet.remove(); eau?.demarrer(true); }
+  if (!reduit && !dejaVue && !direct) gsap.fromTo(['.barre-logo', '.barre-actions', '.haut-socle'], { opacity: 0 }, { opacity: 1, duration: 0.45, ease: 'none', clearProps: 'opacity' });
+  if (reduit || direct) { volet.remove(); eau?.demarrer(true); }
   else if (eau) { volet.remove(); eau.demarrer(); }
   else gsap.to(volet, { scaleY: 0, duration: 0.9, ease: 'power3.inOut', onComplete: () => volet.remove() });
-  sortirDuFaitage($('.haut-titre'), 0.16);
+  sortirDuFaitage($('.haut-titre'), direct ? 0 : 0.16);
 
   document.documentElement.dataset.arrive = '';
   window.__arrivee = performance.now();
   lenis?.start();
+  if (direct) allerA(ancre, true);
 
   $$('[data-section]').forEach((s) => arrivee.observe(s));
   // Les autres photos partent juste après : rien ne doit concurrencer l'ouverture.
-  setTimeout(() => $$('[data-section]').forEach((s) => prechargeur.observe(s)), 700);
+  setTimeout(() => $$('[data-section]').forEach((s) => prechargeur.observe(s)), direct ? 0 : 700);
 }
 
 /* ———————— Prestations : cinq panneaux, uniquement des transforms ———————— */
@@ -187,106 +107,98 @@ function panneaux() {
   boite.addEventListener('pointerleave', () => placer(null));
   boite.addEventListener('focusout', (e) => { if (!boite.contains(e.relatedTarget) && !boite.matches(':hover')) placer(null); });
   window.addEventListener('resize', () => { mesurer(); placer(courant, true); }, { passive: true });
-
-  // « Demander un devis » présélectionne la prestation dans le formulaire.
-  $$('[data-prestation-devis]').forEach((a) => {
-    a.addEventListener('click', () => {
-      const v = a.dataset.prestationDevis;
-      const c = $(`#devis-form input[name="travaux"][value="${v}"]`);
-      if (c) c.checked = true;
-    });
-  });
 }
 
-/* ———————— 6. Façades : maintenir pour voir l'avant. Une coupe, pas de ligne glissante. ———————— */
-function facade() {
-  const section = $('#facades');
-  const photos = $('#facade-photos');
-  const bouton = $('#facade-bouton');
-  const mot = $('#facade-mot');
-  const APRES = { mot: 'après.', bouton: "Maintenir pour voir l’avant" };
-  const AVANT = { mot: 'avant.', bouton: "Relâcher pour voir l’après" };
-  const etat = (tenu) => {
-    section.classList.toggle('tenu', tenu);
-    const e = tenu ? AVANT : APRES;
-    mot.textContent = e.mot; bouton.textContent = e.bouton;
+// « Demander un devis » présélectionne la prestation dans le formulaire, depuis un panneau ou depuis
+// une page prestation (/?travaux=Toiture#devis).
+function preselection() {
+  const cocher = (v) => {
+    const c = $$('#devis-form input[name="travaux"]').find((x) => x.value === v);
+    if (c) c.checked = true;
   };
-  const tenir = (e) => { e.preventDefault(); etat(true); };
-  const lacher = () => { if (section.classList.contains('tenu')) etat(false); };
-  [photos, bouton].forEach((el) => el.addEventListener('pointerdown', tenir));
-  window.addEventListener('pointerup', lacher);
-  window.addEventListener('pointercancel', lacher);
-  window.addEventListener('blur', lacher);
-  bouton.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) { e.preventDefault(); etat(true); } });
-  bouton.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') lacher(); });
-  bouton.addEventListener('blur', lacher);
-  photos.addEventListener('contextmenu', (e) => e.preventDefault());
-}
-
-/* ———————— Mur et visionneuse ———————— */
-// Les photos nettes sont préparées dès le survol. Au clic, la vignette s'affiche tout de suite
-// et la photo nette la remplace dès qu'elle est décodée : le premier clic répond immédiatement.
-const nettes = new Map();
-function preparerNette(id) {
-  if (!nettes.has(id)) {
-    const img = new Image();
-    img.alt = '';
-    img.src = `/img/mur/g/${id}.webp`;
-    nettes.set(id, { img, pret: img.decode().then(() => img, () => null) });
+  $$('[data-prestation-devis]').forEach((a) => a.addEventListener('click', () => cocher(a.dataset.prestationDevis)));
+  const demandes = new URLSearchParams(location.search).getAll('travaux');
+  if (demandes.length) {
+    demandes.forEach(cocher);
+    history.replaceState(null, '', location.pathname + location.hash);
   }
-  return nettes.get(id);
 }
-function visionneuse() {
-  const d = $('#visionneuse');
-  const boite = $('#visionneuse-photo');
-  const titre = $('#visionneuse-titre');
-  const traits = $('#visionneuse-traits');
-  let chantier = null, n = 0, retour = null;
 
-  const montrer = (i) => {
-    n = (i + chantier.photos.length) % chantier.photos.length;
-    const courant = n;
-    const p = chantier.photos[n];
-    const vignette = new Image();
-    vignette.alt = chantier.titre;
-    vignette.src = `/img/mur/v/${p.id}.webp`;
-    boite.replaceChildren(vignette);
-    preparerNette(p.id).pret.then((img) => {
-      if (img && d.open && courant === n && chantier?.photos[n] === p) { img.alt = chantier.titre; boite.replaceChildren(img); }
+/* ———————— Prestations, téléphone : les mêmes panneaux couchés, un seul ouvert. Uniquement des transforms :
+   la hauteur totale ne change jamais, donc la page ne saute pas quand on en ouvre un. ———————— */
+function panneauxTelephone() {
+  const boite = $('#panneaux');
+  const parts = $$('.panneau', boite).map((p) => ({
+    el: p,
+    photo: $('.panneau-photo', p),
+    voile: $('.panneau-voile', p),
+    info: $('.panneau-info', p),
+    focale: Number(p.dataset.focaleTel ?? 0.4),
+  }));
+  let ouvert = 0, ferme = 0, courant = 0;
+  const mesurer = () => {
+    ouvert = parts[0].el.offsetHeight;
+    ferme = (boite.clientHeight - ouvert) / (parts.length - 1);
+  };
+  const placer = (k, instant) => {
+    let y = 0;
+    const d = instant || reduit ? 0 : 0.6;
+    parts.forEach((p, i) => {
+      const lui = i === k;
+      const haut = lui ? ouvert : ferme;
+      gsap.to(p.el, { y, duration: d, ease: 'power3.out', overwrite: 'auto' });
+      gsap.to(p.photo, { y: lui ? 28 : -(ouvert - ferme) * p.focale, duration: d, ease: 'power3.out', overwrite: 'auto' });
+      gsap.to(p.voile, { opacity: lui ? 0 : 0.5, duration: d / 2, ease: 'none', overwrite: 'auto' });
+      gsap.to(p.info, { yPercent: lui ? 0 : 101, duration: lui ? d : d / 2, delay: lui && d ? 0.1 : 0, ease: lui ? 'power3.out' : 'power2.in', overwrite: 'auto' });
+      p.el.classList.toggle('ouvert', lui);
+      p.el.setAttribute('aria-expanded', String(lui));
+      y += haut;
     });
-    $$('i', traits).forEach((t, k) => t.classList.toggle('vu', k <= n));
-    preparerNette(chantier.photos[(n + 1) % chantier.photos.length].id);
-    preparerNette(chantier.photos[(n - 1 + chantier.photos.length) % chantier.photos.length].id);
+    courant = k;
+    if (instant) return;
+    // Le panneau qu'on vient d'ouvrir doit rester entier à l'écran, entre le toit et la barre d'appel.
+    const haut = boite.getBoundingClientRect().top + ferme * k;
+    const bas = haut + ouvert;
+    const limite = window.innerHeight - 60;
+    const decalage = bas > limite ? bas - limite : haut < 72 ? haut - 72 : 0;
+    if (decalage) window.scrollBy({ top: decalage, behavior: reduit ? 'auto' : 'smooth' });
   };
-  const ouvrir = (c, depart, el) => {
-    chantier = c; retour = el;
-    traits.replaceChildren(...c.photos.map(() => document.createElement('i')));
-    titre.textContent = c.titre;
-    lenis?.stop();
-    d.showModal();
-    montrer(depart);
-  };
-  d.addEventListener('close', () => { lenis?.start(); boite.replaceChildren(); retour?.focus?.({ preventScroll: true }); });
-  $('#visionneuse-prec').addEventListener('click', () => montrer(n - 1));
-  $('#visionneuse-suiv').addEventListener('click', () => montrer(n + 1));
-  $('[data-fermer]', d).addEventListener('click', () => d.close());
-  d.addEventListener('keydown', (e) => {
-    if (e.key === 'ArrowRight') montrer(n + 1);
-    if (e.key === 'ArrowLeft') montrer(n - 1);
+  mesurer(); placer(0, true);
+  parts.forEach((p, i) => {
+    p.el.addEventListener('click', () => { if (courant !== i) placer(i); });
+    p.el.addEventListener('focusin', () => { if (courant !== i) placer(i); });
   });
-  return ouvrir;
+  let largeur = window.innerWidth;
+  window.addEventListener('resize', () => {
+    if (window.innerWidth === largeur) return; // la barre d'adresse qui se replie ne change rien ici
+    largeur = window.innerWidth;
+    mesurer(); placer(courant, true);
+  }, { passive: true });
 }
 
-/* ———————— Zone : à l'arrivée, les contours se tracent seuls. Au survol, un département ressort ———————— */
-function zoneAutomatique() {
+/* ———————— Façades : maintenir pour voir l'avant ———————— */
+function facade() {
+  const mot = $('#facade-mot');
+  const bouton = $('#facade-bouton');
+  maintenir({
+    section: $('#facades'), photos: $('#facade-photos'), bouton,
+    changer: (tenu) => {
+      mot.textContent = tenu ? 'avant.' : 'après.';
+      bouton.textContent = tenu ? 'Relâcher pour voir l’après' : 'Maintenir pour voir l’avant';
+    },
+  });
+}
+
+/* ———————— Zones d'intervention : le disque des 40 km autour de Monistrol-sur-Loire ———————— */
+function zone() {
   const section = $('#zone');
   const carte = $('#zone-carte');
-  const noms = $('#zone-noms');
+  const liste = $('#zone-noms');
   const NS = 'http://www.w3.org/2000/svg';
-  const ORDRE = ['42', '43', '69', '38'];
-  // Le point de chaque département le plus éloigné de ses bords : le numéro y tient toujours.
-  const CENTRES = { 42: [296, 213], 43: [232, 534], 69: [482, 240], 38: [842, 552] };
-  carte.setAttribute('viewBox', zone.viewBox);
+  const [cx, cy] = Z.centre;
+  const R = Z.rayon;
+  const codes = Object.keys(Z.departements);
+  carte.setAttribute('viewBox', Z.viewBox);
   const creer = (nom, attrs, parent = carte) => {
     const el = document.createElementNS(NS, nom);
     Object.entries(attrs).forEach(([k, v]) => el.setAttribute(k, v));
@@ -294,123 +206,164 @@ function zoneAutomatique() {
     return el;
   };
   const defs = creer('defs', {});
-  ORDRE.forEach((code) => creer('path', { d: zone.departements[code].d }, creer('clipPath', { id: `dep-${code}` }, defs)));
+  creer('circle', { cx, cy, r: R }, creer('clipPath', { id: 'zone-disque' }, defs));
+  codes.forEach((code) => creer('path', { d: Z.departements[code].d }, creer('clipPath', { id: `dep-${code}` }, defs)));
 
-  const dessiner = (code, parent) => {
-    const g = creer('g', {}, parent);
-    const image = creer('image', { 'clip-path': `url(#dep-${code})`, preserveAspectRatio: 'xMidYMid slice' }, g);
-    const trait = creer('path', { d: zone.departements[code].d, class: 'trait' }, g);
-    const b = trait.getBBox();
-    Object.entries({ x: b.x, y: b.y, width: b.width, height: b.height }).forEach(([k, v]) => image.setAttribute(k, v));
-    const [x, y] = CENTRES[code];
-    const texte = creer('text', { x, y }, g);
-    texte.textContent = code;
-    return { g, image, trait, texte, b };
+  // Autour du disque : les départements voisins et les contours, à peine visibles, pour se situer.
+  // Ils s'effacent vers les bords : aucune ligne coupée net.
+  const fondu = creer('radialGradient', { id: 'zone-fondu', gradientUnits: 'userSpaceOnUse', cx, cy, r: 500 }, defs);
+  creer('stop', { offset: 0.78, 'stop-color': '#fff' }, fondu);
+  creer('stop', { offset: 1, 'stop-color': '#000' }, fondu);
+  creer('rect', { x: 0, y: 0, width: 1000, height: 1000, fill: 'url(#zone-fondu)' }, creer('mask', { id: 'zone-masque', maskUnits: 'userSpaceOnUse', x: 0, y: 0, width: 1000, height: 1000 }, defs));
+  const fond = creer('g', { class: 'zone-fond', mask: 'url(#zone-masque)' });
+  creer('path', { d: Z.voisins, class: 'voisins' }, fond);
+  codes.forEach((code) => creer('path', { d: Z.departements[code].d, class: 'voisins' }, fond));
+  // Dans le disque : la tuile, découpée par les vrais contours de la Loire et de la Haute-Loire.
+  // La tuile reste sombre : les points et les noms doivent ressortir dessus.
+  const TUILE = 0.5;
+  const disque = creer('g', { 'clip-path': 'url(#zone-disque)' });
+  const tuiles = codes.map((code) => creer('image', {
+    'clip-path': `url(#dep-${code})`, preserveAspectRatio: 'xMidYMid slice',
+    x: cx - R, y: cy - R, width: 2 * R, height: 2 * R, opacity: reduit ? TUILE : 0,
+  }, disque));
+  const traits = codes.map((code) => creer('path', { d: Z.departements[code].d, class: 'trait' }, disque));
+  const cercle = creer('circle', { cx, cy, r: R, class: 'cercle', pathLength: 1000, 'stroke-dasharray': 1000, 'stroke-dashoffset': reduit ? 0 : 1000 });
+  const a = Math.PI / 3;
+  const km = creer('text', { x: cx + Math.cos(a) * (R + 26), y: cy + Math.sin(a) * (R + 26), class: 'km', opacity: reduit ? 1 : 0 });
+  km.textContent = `${Z.rayonKm} km`;
+  const numeros = codes.map((code) => {
+    const [x, y] = Z.departements[code].numero;
+    const t = creer('text', { x, y, class: 'numero', opacity: reduit ? 1 : 0 });
+    t.textContent = code;
+    return t;
+  });
+  // Sur téléphone, la carte est trois fois plus petite : les points et les noms grossissent d'autant.
+  const k = telephone ? 1.8 : 1;
+  const repos = (v) => (v.centre ? 11 : 7) * k;
+  const villes = new Map();
+  Z.villes.forEach((v) => {
+    const centre = v.nom === 'Monistrol-sur-Loire';
+    const g = creer('g', { class: centre ? 'ville centre' : 'ville', 'data-code': v.code });
+    creer('circle', { cx: v.x, cy: v.y, r: 30 * k, class: 'cible' }, g); // une cible plus large que le point
+    const point = creer('circle', { cx: v.x, cy: v.y, r: reduit ? (centre ? 11 : 7) * k : 0, class: 'point' }, g);
+    // Les communes autour de Monistrol sont serrées : son nom descend sous le point, au bout d'un filet.
+    if (centre) creer('line', { x1: v.x, y1: v.y + 14 * k, x2: v.x, y2: v.y + 100 * k, class: 'filet' }, g);
+    const aDroite = v.x < 640;
+    const nom = centre
+      ? creer('text', { x: v.x, y: v.y + 134 * k, 'text-anchor': 'middle', class: 'nom' }, g)
+      : creer('text', { x: v.x + (aDroite ? 20 : -20) * k, y: v.y - 16 * k, 'text-anchor': aDroite ? 'start' : 'end', class: 'nom' }, g);
+    nom.textContent = v.nom;
+    villes.set(v.code, { g, point, nom, centre, fond: null });
+  });
+  // L'aplat sous le nom se mesure une fois la police chargée.
+  const aplat = (v) => {
+    if (v.fond) return;
+    const b = v.nom.getBBox();
+    if (!b.width) return;
+    v.fond = document.createElementNS(NS, 'rect');
+    Object.entries({ x: b.x - 9 * k, y: b.y - 3 * k, width: b.width + 18 * k, height: b.height + 6 * k, class: 'fond-nom' })
+      .forEach(([n, val]) => v.fond.setAttribute(n, val));
+    v.g.insertBefore(v.fond, v.nom);
   };
-  const couches = {};
-  ORDRE.forEach((code) => { couches[code] = dessiner(code, carte); });
-  // La couche du survol passe au-dessus des autres sans bouger celles qui captent la souris :
-  // le département grossit sans que le curseur ne « sorte » de lui.
-  const dessus = creer('g', { class: 'zone-dessus' });
-  ORDRE.forEach((code) => {
-    const h = dessiner(code, dessus);
-    couches[code].haut = h;
-    gsap.set(h.g, { opacity: 0, svgOrigin: `${h.b.x + h.b.width / 2} ${h.b.y + h.b.height / 2}` });
-  });
-  ORDRE.forEach((code) => {
-    const c = couches[code];
-    c.trait.setAttribute('pathLength', 1000);
-    c.trait.setAttribute('stroke-dasharray', 1000);
-    c.trait.setAttribute('stroke-dashoffset', reduit ? 0 : 1000);
-    if (!reduit) { c.image.setAttribute('opacity', 0); c.texte.setAttribute('opacity', 0); }
-  });
+  traits.forEach((t) => { t.setAttribute('pathLength', 1000); t.setAttribute('stroke-dasharray', 1000); t.setAttribute('stroke-dashoffset', reduit ? 0 : 1000); });
+  if (!reduit) fond.setAttribute('opacity', 0);
 
-  // La tuile des quatre départements est prête avant d'arriver.
-  const pretes = ORDRE.map((code) => new Promise((r) => {
+  // Les deux tuiles ne partent que lorsque la section approche.
+  let promesses = null;
+  const pretes = () => (promesses ??= codes.map((code, k) => new Promise((r) => {
     const i = new Image();
     i.src = `/img/zone/${code}.webp`;
-    i.decode().catch(() => {}).then(() => {
-      couches[code].image.setAttribute('href', i.src);
-      couches[code].haut.image.setAttribute('href', i.src);
-      r();
-    });
-  }));
+    i.decode().catch(() => {}).then(() => { tuiles[k].setAttribute('href', i.src); r(); });
+  })));
+  new IntersectionObserver(([e], obs) => { if (e.isIntersecting) { obs.disconnect(); pretes(); } }, { rootMargin: '200% 0px' }).observe(section);
 
   let actif = null, pret = reduit;
   const surligner = (code) => {
     if (!pret || code === actif) return;
     actif = code;
-    noms.classList.toggle('survol', !!code);
-    $$('li', noms).forEach((li) => li.classList.toggle('actif', li.dataset.dep === code));
-    const v = reduit ? 0 : 1;
-    ORDRE.forEach((c) => {
-      const o = couches[c];
-      const lui = c === code;
-      gsap.to(o.g, { opacity: code ? 0.26 : 1, duration: 0.32 * v, ease: 'power2.out', overwrite: 'auto' });
-      gsap.to(o.haut.g, { opacity: lui ? 1 : 0, scale: lui ? 1.08 : 1, duration: (lui ? 0.65 : 0.34) * v, ease: lui ? 'power3.out' : 'power2.out', overwrite: 'auto' });
+    if (code) { aplat(villes.get(code)); villes.get(code).g.parentNode.append(villes.get(code).g); }
+    liste.classList.toggle('survol', !!code);
+    $$('li', liste).forEach((li) => li.classList.toggle('actif', li.dataset.code === code));
+    villes.forEach((v, c) => {
+      v.g.classList.toggle('actif', c === code);
+      v.g.classList.toggle('efface', !!code && c !== code);
+      gsap.to(v.point, { attr: { r: c === code ? 13 * k : repos(v) }, duration: reduit ? 0 : 0.35, ease: 'power3.out', overwrite: 'auto' });
     });
   };
-  $$('li', noms).forEach((li) => {
-    li.addEventListener('pointerenter', () => surligner(li.dataset.dep));
-    li.addEventListener('pointerleave', () => surligner(null));
-  });
-  ORDRE.forEach((code) => {
-    couches[code].g.addEventListener('pointerenter', () => surligner(code));
-    couches[code].g.addEventListener('pointerleave', () => surligner(null));
-  });
+  if (telephone) {
+    // Pas de survol au doigt : on touche une ville, et on retouche pour revenir.
+    const basculer = (code) => surligner(actif === code ? null : code);
+    $$('li', liste).forEach((li) => li.addEventListener('click', (e) => { e.stopPropagation(); basculer(li.dataset.code); }));
+    villes.forEach((v, c) => v.g.addEventListener('click', (e) => { e.stopPropagation(); basculer(c); }));
+    section.addEventListener('click', () => surligner(null));
+  } else {
+    $$('li', liste).forEach((li) => {
+      li.addEventListener('pointerenter', () => surligner(li.dataset.code));
+      li.addEventListener('pointerleave', () => surligner(null));
+    });
+    villes.forEach((v, c) => {
+      v.g.addEventListener('pointerenter', () => surligner(c));
+      v.g.addEventListener('pointerleave', () => surligner(null));
+    });
+  }
 
   let joue = false;
   const jouer = () => {
     if (joue) return;
     joue = true;
-    if (reduit) return;
+    villes.forEach(aplat);
+    if (reduit) { carte.classList.add('joue'); return; }
+    const parDistance = Z.villes.slice().sort((p, q) => p.km - q.km);
     const tl = gsap.timeline({ onComplete: () => { pret = true; } });
-    tl.to('#zone-intro', { opacity: 1, duration: 0.35, ease: 'none' }, 0);
-    ORDRE.forEach((code, i) => {
-      const t = 0.1 + i * 0.55;
-      const c = couches[code];
-      tl.to(`#zone-noms [data-dep="${code}"]`, { opacity: 1, duration: 0.3, ease: 'none' }, t);
-      tl.to(c.trait, { attr: { 'stroke-dashoffset': 0 }, duration: 0.85, ease: 'power2.inOut' }, t);
-      tl.to(c.image, { attr: { opacity: 1 }, duration: 0.45, ease: 'none' }, t + 0.62);
-      tl.to(c.texte, { attr: { opacity: 1 }, duration: 0.25, ease: 'none' }, t + 0.7);
+    tl.to(['#zone-titre', '#zone-intro', '#zone-rayon'], { opacity: 1, duration: 0.35, ease: 'none', stagger: 0.08 }, 0)
+      .to($$('li', liste), { opacity: 1, duration: 0.3, ease: 'none', stagger: 0.04 }, 0.1)
+      .to(fond, { attr: { opacity: 1 }, duration: 0.6, ease: 'none' }, 0.1)
+      .to(traits, { attr: { 'stroke-dashoffset': 0 }, duration: 1, ease: 'power2.inOut', stagger: 0.15 }, 0.2)
+      .to(cercle, { attr: { 'stroke-dashoffset': 0 }, duration: 1.2, ease: 'power2.inOut' }, 0.4)
+      .to(tuiles, { attr: { opacity: TUILE }, duration: 0.6, ease: 'none', stagger: 0.15 }, 1.05)
+      .to([...numeros, km], { attr: { opacity: 1 }, duration: 0.3, ease: 'none' }, 1.4)
+      .call(() => carte.classList.add('joue'), null, 1.3); // le nom de Monistrol arrive avec son point
+    parDistance.forEach((v, i) => {
+      const p = villes.get(v.code);
+      tl.to(p.point, { attr: { r: repos(p) }, duration: 0.35, ease: 'back.out(2)' }, 1.3 + i * 0.06);
     });
   };
   new IntersectionObserver(([e], obs) => {
     if (!e.isIntersecting) return;
     obs.disconnect();
-    Promise.race([Promise.all(pretes), new Promise((r) => setTimeout(r, 700))]).then(jouer);
-  }, { threshold: 0.45 }).observe(section);
+    Promise.race([Promise.all(pretes()), new Promise((r) => setTimeout(r, 700))]).then(jouer);
+  }, { threshold: telephone ? 0.2 : 0.45 }).observe(section);
 }
 
-/* ———————— Avis Google : masqué tant que le fichier est vide ———————— */
+/* ———————— Avis Google : le lien dès que la fiche est connue, les avis dès qu'il y en a ———————— */
 async function avis() {
   const section = $('#avis');
+  let liste = [];
   try {
     const r = await fetch('/donnees/avis.json', { cache: 'no-cache' });
-    if (!r.ok) return;
-    const d = await r.json();
-    if (!d.avis?.length) return;
-    section.innerHTML = '';
-    d.avis.forEach((a) => {
-      const b = document.createElement('blockquote');
-      b.textContent = a.texte;
-      const c = document.createElement('cite');
-      c.textContent = a.date ? `${a.auteur}, ${a.date}` : a.auteur;
-      b.append(c);
-      section.append(b);
-    });
-    if (d.lienFiche) {
-      const l = document.createElement('a');
-      l.className = 'avis-lien';
-      l.href = d.lienFiche; l.rel = 'noopener'; l.target = '_blank';
-      l.textContent = 'Lire tous les avis sur Google';
-      section.append(l);
-    }
-    section.hidden = false;
-  } catch { /* pas d'avis, pas de bloc */ }
+    if (r.ok) liste = (await r.json()).avis || [];
+  } catch { /* pas d'avis */ }
+  if (!liste.length && !E.ficheGoogle) return;
+  section.innerHTML = '';
+  liste.forEach((a) => {
+    const b = document.createElement('blockquote');
+    b.textContent = a.texte;
+    const c = document.createElement('cite');
+    c.textContent = a.date ? `${a.auteur}, ${a.date}` : a.auteur;
+    b.append(c);
+    section.append(b);
+  });
+  if (E.ficheGoogle) {
+    const l = document.createElement('a');
+    l.className = 'avis-lien';
+    l.href = E.ficheGoogle; l.rel = 'noopener'; l.target = '_blank';
+    l.textContent = 'Voir nos avis sur Google';
+    section.append(l);
+  }
+  section.hidden = false;
 }
 
-/* ———————— 10. Devis : prêt pour Netlify Forms ———————— */
+/* ———————— Devis : prêt pour Netlify Forms ———————— */
 function devis() {
   const form = $('#devis-form');
   const retour = $('#devis-retour');
@@ -459,124 +412,24 @@ function devis() {
       form.reset();
       dire('ok', 'Votre demande est bien partie. Nous vous répondons dès que possible.');
     } catch {
-      dire('ko', 'L’envoi n’a pas abouti. Réessayer, ou appeler le <a href="tel:+33668192636">06&nbsp;68&nbsp;19&nbsp;26&nbsp;36</a>.');
+      dire('ko', `L’envoi n’a pas abouti. Réessayer, ou appeler le <a href="tel:${E.telephoneLien}">${E.telephone.replace(/ /g, '&nbsp;')}</a>.`);
     }
     bouton.disabled = false;
     bouton.textContent = 'Envoyer ma demande';
   });
 }
 
-/* ———————— Menu : le toit descend sur la page, le bloc monte jusqu'en haut ———————— */
-function menu() {
-  const m = $('#menu');
-  const fond = $('.menu-fond', m);
-  const liens = $$('.menu-liens a', m);
-  const mots = $$('.menu-liens a > span', m);
-  const vues = $('#menu-vues', m);
-  const toit = $('.barre-toit');
-  const bouton = $('#menu-ouvrir');
-  const dehors = [$('main'), $('.pied')];
-  const images = new Map();
-  let tl = null, ouvert = false;
-
-  // Toutes les vues sont décodées dès le survol du bouton : aucune case vide d'un lien à l'autre.
-  const precharger = () => {
-    if (images.size) return;
-    liens.forEach((a) => {
-      const i = new Image();
-      i.alt = ''; i.decoding = 'async';
-      i.src = `/img/menu/${a.dataset.vue}.webp`;
-      i.decode?.().catch(() => {});
-      vues.append(i);
-      images.set(a.dataset.vue, i);
-    });
-  };
-  const montrer = (vue) => images.forEach((i, k) => i.classList.toggle('active', k === vue));
-  bouton.addEventListener('pointerenter', precharger);
-  liens.forEach((a) => {
-    a.addEventListener('pointerenter', () => montrer(a.dataset.vue));
-    a.addEventListener('focus', () => montrer(a.dataset.vue));
-  });
-
-  const construire = () => {
-    // Départ : exactement la forme de la barre. Arrivée : la même forme, tombée sous le bas de l'écran.
-    const r = (toit.getBoundingClientRect().height / window.innerHeight) * 100;
-    const forme = (d) => `polygon(0% 0%, 100% 0%, 100% ${r + d}%, 50% ${d}%, 0% ${r + d}%)`;
-    const d = (v) => (reduit ? 0.01 : v);
-    const a = (v) => (reduit ? 0 : v);
-    return gsap.timeline({
-      paused: true,
-      onReverseComplete: () => { m.hidden = true; dehors.forEach((e) => { e.inert = false; }); lenis?.start(); },
-    })
-      .fromTo(fond, { clipPath: forme(0) }, { clipPath: forme(100), duration: d(0.95), ease: 'power4.inOut' }, 0)
-      .set(toit, { visibility: 'hidden' }, a(0.5)) // le noir a passé la barre : le bloc peut monter jusqu'en haut
-      .fromTo(vues, { yPercent: 101 }, { yPercent: 0, duration: d(0.95), ease: 'power4.out' }, a(0.5))
-      .fromTo(mots, { yPercent: 118 }, { yPercent: 0, duration: d(0.85), ease: 'power4.out', stagger: a(0.055) }, a(0.42));
-  };
-
-  const ouvrir = () => {
-    if (ouvert) return;
-    ouvert = true;
-    precharger();
-    montrer(liens[0].dataset.vue);
-    m.hidden = false;
-    lenis?.stop();
-    dehors.forEach((e) => { e.inert = true; });
-    bouton.textContent = 'Fermer';
-    bouton.setAttribute('aria-expanded', 'true');
-    tl ??= construire();
-    tl.timeScale(1).play();
-    liens[0].focus({ preventScroll: true });
-  };
-  const fermer = (cible) => {
-    if (!ouvert) return;
-    ouvert = false;
-    bouton.textContent = 'Menu';
-    bouton.setAttribute('aria-expanded', 'false');
-    // La page est cachée par le noir : on saute à la section, et le toit remonte dessus.
-    if (cible) {
-      const el = $(cible);
-      if (lenis) lenis.scrollTo(el, { immediate: true, force: true });
-      else window.scrollTo(0, el.getBoundingClientRect().top + scrollY);
-    }
-    tl.timeScale(1.35).reverse();
-    bouton.focus({ preventScroll: true });
-  };
-
-  bouton.addEventListener('click', () => (ouvert ? fermer() : ouvrir()));
-  liens.forEach((a) => a.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    fermer(a.getAttribute('href'));
-  }));
-  $$('.barre a[href^="#"]').forEach((a) => a.addEventListener('click', (e) => {
-    if (!ouvert) return;
-    e.preventDefault();
-    e.stopPropagation();
-    fermer(a.getAttribute('href'));
-  }));
-  window.addEventListener('keydown', (e) => { if (e.key === 'Escape') fermer(); });
-  window.addEventListener('resize', () => { if (m.hidden) tl = null; }, { passive: true }); // la pente dépend de l'écran
-}
-
-/* ———————— Mentions légales ———————— */
-function mentions() {
-  const d = $('#mentions');
-  $$('[data-mentions]').forEach((b) => b.addEventListener('click', () => { lenis?.stop(); d.showModal(); d.scrollTop = 0; }));
-  $('[data-fermer]', d).addEventListener('click', () => d.close());
-  d.addEventListener('close', () => lenis?.start());
-}
-
 /* ———————— Départ ———————— */
-panneaux();
+liensInternes();
+piedDePage();
+if (telephone) { panneauxTelephone(); barresTelephone(); } else panneaux();
+preselection();
 facade();
 const ouvrirChantier = visionneuse();
 creerMur({ vue: $('#mur-vue'), monde: $('#mur-monde'), section: $('#chantiers'), ouvrir: ouvrirChantier, preparer: preparerNette, reduit });
-zoneAutomatique();
+zone();
 avis();
 devis();
-menu();
+creerMenu();
 mentions();
 demarrerHaut();
-
-window.__lenis = lenis;

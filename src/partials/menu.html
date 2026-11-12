@@ -1,0 +1,13 @@
+<!-- Menu : le toit descend sur la page, le bloc monte jusqu'en haut. Tout s'annule à la fermeture. -->
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Menu" hidden>
+  <div class="menu-fond"></div>
+  <nav class="menu-liens titre" aria-label="Navigation principale">
+    <a href="{{base}}#prestations" data-vue="prestations"><span>Prestations</span></a>
+    <a href="{{base}}#entreprise" data-vue="entreprise"><span>L’entreprise</span></a>
+    <a href="{{base}}#facades" data-vue="facades"><span>Façades</span></a>
+    <a href="{{base}}#chantiers" data-vue="chantiers"><span>Chantiers</span></a>
+    <a href="{{base}}#zone" data-vue="zone"><span>Zone</span></a>
+    <a href="{{base}}#devis" data-vue="devis"><span>Devis</span></a>
+  </nav>
+  <div class="menu-bloc" aria-hidden="true"><div class="menu-vues" id="menu-vues"></div></div>
+</div>

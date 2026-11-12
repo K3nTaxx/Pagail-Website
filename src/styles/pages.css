@@ -1,0 +1,129 @@
+/* Duculty Couverture : les pages prestations.
+   Le même langage que l'accueil : noir, un seul bleu en aplats, la photo de chantier pour seule matière.
+   Les titres de section sont petits, la liste des travaux est en grand. */
+
+.page-service .barre { visibility: visible; }
+.page-service main { padding-bottom: 6vw; }
+
+/* ———————— En-tête : le métier, puis la ville ———————— */
+.svc-tete {
+  display: grid; grid-template-columns: minmax(0, 1fr) 31vw; column-gap: 5vw; align-items: end;
+  padding: calc(var(--toit) + 2.6vw) var(--m) 0;
+}
+.svc-fil { grid-column: 1 / -1; display: flex; gap: .7em; margin-bottom: 1.4vw; color: var(--gris); font-size: .92em; }
+.svc-fil a:hover { color: var(--blanc); }
+.svc-titre { font-size: min(5.6vw, 9.8vh); line-height: .92; margin-left: -.035em; text-wrap: balance; }
+.svc-titre span { display: block; }
+.svc-intro { font-size: 1.08em; line-height: 1.42; text-wrap: pretty; padding-bottom: .3em; }
+
+/* ———————— La grande photo : plein bord ———————— */
+.svc-photo-bloc { margin-top: 3vw; }
+.svc-photo { position: relative; height: min(80vh, 56vw); overflow: hidden; }
+.svc-photo img { width: 100%; height: 100%; object-fit: cover; object-position: var(--pos, 50% 50%); }
+
+/* ———————— Les blocs : un petit titre à gauche, le contenu à droite ———————— */
+.svc-bloc {
+  display: grid; grid-template-columns: 24vw minmax(0, 1fr); column-gap: 3vw; align-items: start;
+  padding: 6vw var(--m) 0;
+}
+.svc-h2 { font: 600 1.04em/1.3 'Familjen Grotesk', Arial, sans-serif; padding-top: .35em; }
+.svc-liste { font-size: min(4.6vw, 8vh); line-height: 1; }
+.svc-liste li { margin-left: -.03em; padding: .04em 0; }
+
+/* Avant, après : deux photos côte à côte. */
+.svc-paire { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+.svc-paire figure { position: relative; overflow: hidden; }
+.svc-paire img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; }
+.svc-paire figcaption { padding-top: .6em; font-weight: 500; }
+
+/* Avant, après : maintenir pour voir l'avant, comme sur l'accueil. */
+.svc-maintien { grid-template-columns: 24vw minmax(0, 1fr); }
+.svc-gauche { display: flex; flex-direction: column; align-items: flex-start; gap: 1.4vw; }
+.svc-gauche .svc-h2 { padding-top: .35em; }
+.svc-note { color: var(--gris); font-size: .94em; line-height: 1.38; }
+.svc-maintenir { min-width: 17em; }
+.svc-maintien.tenu .svc-maintenir { background: var(--blanc); color: var(--noir); }
+.svc-maintien-photos {
+  position: relative; overflow: hidden; aspect-ratio: 1800 / 1889; max-height: 88vh; justify-self: end; width: min(100%, calc(88vh * 1800 / 1889));
+  cursor: pointer; touch-action: none; user-select: none;
+}
+.svc-maintien-photos img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; -webkit-user-drag: none; }
+.maintien-avant { visibility: hidden; z-index: 1; }
+.svc-maintien.tenu .maintien-avant { visibility: visible; }
+
+/* Galerie : une planche de photos de chantier, bord à bord. */
+.svc-grille { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.svc-vignette { position: relative; display: block; width: 100%; aspect-ratio: 1; overflow: hidden; background: #111; }
+.svc-vignette img { width: 100%; height: 100%; object-fit: cover; transition: opacity .18s linear; }
+.svc-grille:hover .svc-vignette:not(:hover) img { opacity: .42; }
+.svc-vignette span {
+  position: absolute; left: 0; bottom: 0; padding: .32em .6em .38em;
+  background: var(--noir); font-size: .82em; font-weight: 500;
+}
+.svc-vignette span:empty { display: none; }
+.svc-vignette:focus-visible { outline-offset: -3px; }
+
+.svc-zone-texte { font-size: 1.3em; line-height: 1.36; max-width: 38em; text-wrap: pretty; }
+
+/* ———————— Devis : un aplat bleu, le numéro en grand ———————— */
+.svc-appel {
+  --fond: var(--bleu);
+  margin-top: 7vw; padding: 2.4vw var(--m) 2.2vw;
+  background: var(--bleu);
+  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 3vw; align-items: end;
+}
+.svc-appel .svc-h2 { grid-column: 1 / -1; padding: 0 0 1vw; }
+.svc-tel { font-size: min(10vw, 17vh); line-height: .86; white-space: nowrap; margin-left: -.04em; }
+.svc-tel:focus-visible, .svc-appel .bouton:focus-visible { outline-color: var(--blanc); }
+.svc-appel .bouton { background: var(--noir); }
+.svc-appel .bouton:hover { background: var(--blanc); color: var(--noir); }
+
+/* ———————— Les autres prestations ———————— */
+.svc-autres ul { font-size: min(3.4vw, 6vh); line-height: 1.06; }
+.svc-autres a { display: inline-block; margin-left: -.03em; transition: color .16s linear; }
+.svc-autres ul:hover a { color: #48484D; }
+.svc-autres ul:hover a:hover, .svc-autres a:focus-visible { color: var(--blanc); }
+
+/* ———————— Téléphone ———————— */
+@media (max-width: 900px), (pointer: coarse) and (max-height: 500px) {
+  .page-service main { padding-bottom: 44px; }
+  .svc-tete { display: block; padding: calc(var(--toit) + 14px) var(--m) 0; }
+  .svc-fil { margin-bottom: 14px; font-size: 13.5px; }
+  .svc-fil a { padding: 8px 0; margin: -8px 0; }
+  .svc-titre { font-size: var(--titre); line-height: .98; }
+  .svc-intro { margin-top: 14px; font-size: 15.5px; line-height: 1.45; }
+  .svc-photo-bloc { margin-top: 24px; }
+  .svc-photo { height: auto; aspect-ratio: 1.08; max-height: calc(var(--sh) * 70); }
+
+  .svc-bloc { display: block; padding: 46px var(--m) 0; }
+  .svc-h2 { font-size: 14.5px; padding: 0 0 10px; color: var(--gris); }
+  .svc-liste { font-size: clamp(24px, 7.4vw, 36px); line-height: 1.04; }
+
+  .svc-paire figcaption { font-size: 14px; padding-top: 6px; }
+
+  .svc-maintien { display: flex; flex-direction: column; }
+  .svc-gauche { display: contents; }
+  .svc-gauche .svc-h2 { order: 0; padding: 0 0 10px; }
+  .svc-note { order: 1; margin-bottom: 14px; font-size: 14.5px; }
+  .svc-maintien-photos { order: 2; width: calc(100% + 2 * var(--m)); margin: 0 calc(-1 * var(--m)); max-height: calc(var(--sh) * 88); justify-self: auto; touch-action: pan-y; -webkit-touch-callout: none; }
+  .svc-maintenir { order: 3; width: 100%; min-width: 0; height: 50px; padding: 0; margin-top: 12px; font-size: 15.5px; touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none; }
+
+  .svc-grille { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
+  .svc-grille:hover .svc-vignette:not(:hover) img { opacity: 1; }
+  .svc-vignette span { display: none; }
+
+  .svc-zone-texte { font-size: 16px; line-height: 1.45; }
+
+  .svc-appel { display: flex; flex-direction: column; align-items: flex-start; margin-top: 50px; padding: 24px var(--m) 22px; }
+  .svc-appel .svc-h2 { color: var(--blanc); padding: 0 0 6px; }
+  .svc-tel { font-size: clamp(40px, 12.4vw, 66px); line-height: 1; padding: 4px 0; }
+  .svc-tel:active { color: var(--noir); }
+  .svc-appel .bouton { width: 100%; height: 50px; margin-top: 14px; font-size: 15.5px; }
+  .svc-appel .bouton:hover { background: var(--noir); color: var(--blanc); }
+  .svc-appel .bouton:active { background: var(--blanc); color: var(--noir); }
+
+  .svc-autres ul { font-size: clamp(22px, 6.6vw, 32px); line-height: 1.1; }
+  .svc-autres a { padding: .12em 0; }
+  .svc-autres ul:hover a { color: var(--blanc); }
+  .svc-autres a:active { color: var(--bleu-clair); }
+}

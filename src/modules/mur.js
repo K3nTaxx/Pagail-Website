@@ -3,9 +3,10 @@
 // existent dans le DOM, et chaque vignette a une couleur de fond tirée de sa photo.
 import { gsap } from 'gsap';
 import donnees from '../data/chantiers.json';
+import { telephone } from './appareil.js';
 
-const MARGE_CHARGE = 0.35; // en écrans : les vignettes existent un peu avant d'arriver à l'écran
-const MARGE_RETIRE = 0.9;
+const MARGE_CHARGE = telephone ? 1 : 0.35; // en écrans : les vignettes existent un peu avant d'arriver à l'écran
+const MARGE_RETIRE = telephone ? 1.8 : 0.9;
 
 // Un bloc = un chantier. Tous les blocs ont la même hauteur, pour que le mur reste plein :
 // une grande photo, puis des colonnes de deux, et une seconde grande si le compte est pair.
@@ -29,24 +30,30 @@ function blocChantier(c, u, gap, h1, H) {
 
 // Les rangs partent du centre : les premiers chantiers du manifeste sont ceux qu'on voit en arrivant.
 function disposer(chantiers, vue) {
-  const u = Math.round(Math.max(170, vue.l * 0.122));
-  const gap = 6;
-  const h1 = Math.round(u * 1.3);
+  // Téléphone : le mur se règle sur la hauteur disponible, en deux rangs (un seul si le téléphone est couché).
+  const rangsTel = vue.h < 400 ? 1 : vue.h >= 640 ? 3 : 2;
+  const gap = telephone ? 3 : 6;
+  const entre0 = 10;
+  const h1 = telephone
+    ? Math.floor(((vue.h - entre0 * (rangsTel - 1)) / rangsTel - gap) / 2)
+    : Math.round(Math.round(Math.max(170, vue.l * 0.122)) * 1.3);
+  const u = telephone ? Math.round(h1 / 1.3) : Math.round(Math.max(170, vue.l * 0.122));
   const H = h1 * 2 + gap;
-  const entre = Math.round(u * 0.18);
+  const entre = telephone ? entre0 : Math.round(u * 0.18);
   const pasRang = H + entre;
   const blocs = chantiers.map((c) => blocChantier(c, u, gap, h1, H));
 
   const largeurTotale = blocs.reduce((t, b) => t + b.l + entre, 0);
-  const R = Math.max(1, Math.min(7, Math.round(Math.sqrt((largeurTotale * pasRang) / 1.9) / pasRang)));
+  const R = telephone ? rangsTel : Math.max(1, Math.min(7, Math.round(Math.sqrt((largeurTotale * pasRang) / 1.9) / pasRang)));
   const ordre = [...Array(R).keys()].sort((a, b) => Math.abs(a - (R - 1) / 2) - Math.abs(b - (R - 1) / 2));
   const rangs = ordre.map((r) => ({ r, g: 0, d: 0 }));
 
   const places = blocs.map((b) => {
     const rang = rangs.reduce((m, x) => (x.g + x.d < m.g + m.d ? x : m));
-    const decale = rang.r % 2 ? Math.round(u * 0.7) : 0; // joints décalés, comme des rangs de tuiles
+    const decale = !telephone && rang.r % 2 ? Math.round(u * 0.7) : 0; // joints décalés, comme des rangs de tuiles
     let x;
-    if (rang.d <= rang.g) { x = rang.d + decale; rang.d += b.l + entre; }
+    // Téléphone : tout part du bord gauche, on ne glisse que vers la droite.
+    if (telephone || rang.d <= rang.g) { x = rang.d + decale; rang.d += b.l + entre; }
     else { rang.g += b.l + entre; x = -rang.g + decale; }
     const y = (rang.r - (R - 1) / 2) * pasRang - H / 2;
     return { ...b, x, y };
@@ -56,7 +63,7 @@ function disposer(chantiers, vue) {
   const x0 = Math.min(...places.map((b) => b.x)), x1 = Math.max(...places.map((b) => b.x + b.l));
   const y0 = Math.min(...places.map((b) => b.y)), y1 = Math.max(...places.map((b) => b.y + b.h));
 
-  const taille = Math.min(window.innerWidth * 0.112, window.innerHeight * 0.2);
+  const taille = telephone ? 0 : Math.min(window.innerWidth * 0.112, window.innerHeight * 0.2);
   const titreL = Math.round(taille * 4.03), titreH = Math.round(taille * 0.86);
   const titre = { x: -titreL / 2, y: -titreH / 2, l: titreL, h: titreH };
   const bornes = {
@@ -80,7 +87,7 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
   const bornes = () => {
     // Le monde peut être plus petit que l'écran (un seul filtre) : on le centre alors.
     const b = plan.bornes;
-    const marge = 40;
+    const marge = telephone ? 16 : 40;
     const minX = vueL - b.x1 - marge, maxX = -b.x0 + marge;
     const minY = vueH - b.y1 - marge, maxY = -b.y0 + marge;
     return {
@@ -123,7 +130,7 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
       });
     });
 
-    px = vueL / 2 - plan.centre.x;
+    px = telephone ? 16 : vueL / 2 - plan.centre.x;
     py = vueH / 2 - plan.centre.y;
     vx = vy = 0;
     const b = bornes();
@@ -263,7 +270,7 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
     }
     if (bouge) {
       const b = bornes();
-      let nx = depart.px + dx, ny = depart.py + dy;
+      let nx = depart.px + dx, ny = telephone ? depart.py : depart.py + dy; // au doigt, la verticale fait défiler la page
       // Résistance au bord.
       if (nx > b.maxX) nx = b.maxX + (nx - b.maxX) * 0.3;
       if (nx < b.minX) nx = b.minX + (nx - b.minX) * 0.3;
@@ -273,7 +280,7 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
       const now = performance.now();
       const dt = Math.max(1, now - depart.lt);
       vx = gsap.utils.clamp(-70, 70, (e.clientX - depart.lx) / dt * 16.7);
-      vy = gsap.utils.clamp(-70, 70, (e.clientY - depart.ly) / dt * 16.7);
+      vy = telephone ? 0 : gsap.utils.clamp(-70, 70, (e.clientY - depart.ly) / dt * 16.7);
       depart.lx = e.clientX; depart.ly = e.clientY; depart.lt = now;
     }
   }, { passive: true });
@@ -332,7 +339,7 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
     monde.querySelectorAll('.tuile').forEach((t) => t.toggleAttribute('data-chantier-actif', t.dataset.chantier === id));
   }
   vue.addEventListener('pointermove', (e) => {
-    if (tire) return;
+    if (tire || telephone) return; // au doigt, pas de survol : le toucher ouvre le chantier
     survoler(blocSous(e.clientX, e.clientY));
     const t = e.target.closest?.('.tuile');
     if (t) preparer?.(t.dataset.photo); // la photo nette est prête avant même le clic
@@ -366,6 +373,8 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
       filtre = b.dataset.filtre;
       section.querySelectorAll('[data-filtre]').forEach((x) => x.setAttribute('aria-pressed', x === b));
       placerCurseur();
+      // Sur petit écran, les filtres dépassent : celui qu'on vient de toucher revient au centre.
+      if (telephone) b.parentElement.scrollTo({ left: b.offsetLeft - (b.parentElement.clientWidth - b.offsetWidth) / 2, behavior: reduit ? 'auto' : 'smooth' });
       construire(true);
     });
   });
@@ -373,7 +382,12 @@ export function creerMur({ vue, monde, section, ouvrir, preparer, reduit }) {
   let attente;
   window.addEventListener('resize', () => {
     clearTimeout(attente);
-    attente = setTimeout(() => { placerCurseur(true); if (actif) construire(); else plan = null; }, 180);
+    attente = setTimeout(() => {
+      // Sur téléphone, la barre d'adresse qui se replie ne doit pas reconstruire le mur.
+      if (telephone && vue.clientWidth === vueL && vue.clientHeight === vueH) return;
+      placerCurseur(true);
+      if (actif) construire(); else plan = null;
+    }, 180);
   }, { passive: true });
 
   // Le mur n'existe vraiment que lorsqu'il approche de l'écran (préchargé deux écrans à l'avance).

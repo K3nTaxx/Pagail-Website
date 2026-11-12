@@ -1,0 +1,290 @@
+/* Duculty Couverture : la version téléphone.
+   Tout est dans ce fichier : la version ordinateur (site.css) n'est pas modifiée.
+   Principe : des titres petits et serrés, la photo pour seule matière, le pouce pour seul outil. */
+
+/* Éléments propres au téléphone, absents de la version ordinateur. */
+.appel, .mur-entete { display: none; }
+
+@media (max-width: 900px), (pointer: coarse) and (max-height: 500px) {
+  :root {
+    --sh: 1vh;                                  /* hauteur d'écran stable, sans la barre d'adresse */
+    --m: max(clamp(16px, 4.6vw, 32px), env(safe-area-inset-left), env(safe-area-inset-right));
+    --bas: 54px;                                /* barre d'appel */
+    --section: clamp(78px, 20vw, 120px);        /* assez pour qu'un titre ne passe jamais sous le toit */
+    --titre: clamp(30px, 8.8vw, 46px);          /* titres de section : petits et serrés */
+    --pente: min(9.36vw, calc(var(--sh) * 9));  /* 10,6° : la même pente que les titres */
+    --toit: max(70px, calc(var(--pente) + 30px));
+  }
+  @supports (height: 1svh) { :root { --sh: 1svh; } }
+
+  /* Un balayage sur le toit ou la fresque ne doit jamais faire reculer d'une page. */
+  html, body { overscroll-behavior-x: none; }
+  html { -webkit-tap-highlight-color: transparent; }
+  html.fige, html.fige body { overflow: hidden; }
+  body { font-size: 15.5px; line-height: 1.45; }
+
+  /* Sur un écran tactile, un survol reste collé après le doigt : tout repasse sur :active. */
+  .bouton:hover { background: var(--bleu); color: var(--blanc); }
+  .bouton:active { background: var(--blanc); color: var(--noir); }
+  .devis .bouton:hover { background: var(--bleu); color: var(--blanc); }
+  .devis .bouton:active { background: var(--noir); color: var(--blanc); }
+  .lien:hover, .pied-contact a[href^="mailto"]:hover, .devis-mail:hover, .panneau-info p a:hover,
+  .zone-rayon a:hover, .pied-services a:hover, .urgence-lien:hover { color: inherit; }
+  .barre-menu:hover { color: var(--blanc); }
+  .mur-filtres button:hover { color: var(--gris); }
+  .mur-filtres button[aria-pressed="true"]:hover { color: var(--blanc); }
+  .pastilles label:hover span { background: transparent; color: var(--noir); }
+  .pastilles input:checked + span, .pastilles label:hover input:checked + span { background: var(--bleu); border-color: var(--bleu); color: var(--blanc); }
+  .visionneuse-fermer:hover { background: var(--blanc); color: var(--noir); }
+  .mentions-fermer:hover { background: var(--noir); }
+
+  /* ———————— La barre : le toit, plus court. Le logo à gauche, le menu à droite ———————— */
+  .barre { transition: transform .34s cubic-bezier(.2, .7, .2, 1); }
+  .barre.barre-cachee { transform: translateY(calc(-1 * var(--toit) - 8px)); }
+  .barre-toit { clip-path: polygon(0 0, 100% 0, 100% 100%, 50% calc(100% - var(--pente)), 0 100%); }
+  .barre-logo { --largeur: clamp(84px, 13vw, 128px); top: 6px; }
+  .barre-actions { background: none; padding: 0; gap: 0; }
+  .barre-tel, .barre-devis { display: none; }
+  .barre-menu { font-size: 15px; font-weight: 500; padding: 14px var(--m) 14px 20px; }
+
+  /* ———————— La barre d'appel : les deux objectifs du site, sous le pouce ———————— */
+  .appel {
+    display: grid; grid-template-columns: 1fr 1fr;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 48;
+    background: var(--noir);
+    padding-bottom: env(safe-area-inset-bottom);
+    transition: transform .34s cubic-bezier(.2, .7, .2, 1);
+  }
+  .appel.appel-cachee { transform: translateY(101%); }
+  html:not(.js) .appel.appel-cachee { transform: none; }
+  .appel a { display: flex; align-items: center; justify-content: center; height: var(--bas); }
+  .appel-tel { font: 800 21px/1 'Big Shoulders Display', sans-serif; letter-spacing: .014em; }
+  .appel-devis { background: var(--bleu); font-size: 15px; font-weight: 600; }
+  .appel-devis:active { background: var(--blanc); color: var(--noir); }
+
+  /* ———————— Haut de page : tout le toit, le titre posé sur ses deux pentes ———————— */
+  .haut {
+    --d1: 9.2vw;
+    --d2: 10.8vw;
+    height: 100vh; height: 100svh; min-height: 320px;
+  }
+  /* Un voile très léger : le titre, plus petit que sur ordinateur, a besoin d'un peu plus de contraste. */
+  .haut-photo::after { content: ''; position: absolute; inset: 0; background: var(--noir); opacity: .1; pointer-events: none; }
+  .haut-titre { top: 47%; font-size: clamp(27px, 8.5vw, 52px); line-height: 1.08; }
+  /* Le socle se pose juste au-dessus de la barre d'appel. */
+  .haut-socle {
+    display: block;
+    padding: 14px var(--m) calc(var(--bas) + 14px + env(safe-area-inset-bottom));
+  }
+  .haut-h1 { font-size: clamp(17px, 4.9vw, 24px); line-height: 1.02; margin-bottom: 7px; white-space: normal; }
+  .haut-intro { font-size: 13.5px; line-height: 1.4; max-width: none; }
+
+  /* ———————— Prestations : les cinq panneaux, couchés. Un seul ouvert à la fois ———————— */
+  .prestations {
+    --ferme: 72px;
+    --ouvert: clamp(372px, calc(var(--sh) * 56), 500px);
+    height: auto; min-height: 0; overflow: visible; padding-top: var(--toit);
+  }
+  .panneaux { position: relative; inset: auto; height: calc(var(--ferme) * 4 + var(--ouvert)); }
+  .panneau { width: 100%; height: var(--ouvert); box-shadow: 0 -2px 0 var(--noir); cursor: pointer; }
+  .panneau-titre {
+    left: 0; right: 0; top: 0; bottom: auto; padding: 0 var(--m);
+    height: var(--ferme); display: flex; align-items: center;
+    font-size: clamp(25px, 7.4vw, 36px); line-height: 1;
+    writing-mode: horizontal-tb; transform: none;
+    transition: background-color .28s linear;
+  }
+  /* Ouvert, le titre passe sur un aplat noir, comme sur ordinateur : la photo reprend toute sa lumière. */
+  .panneau.ouvert .panneau-titre { background: var(--noir); }
+  .panneau::after {
+    content: '+'; position: absolute; z-index: 3; right: var(--m); top: 0;
+    height: var(--ferme); display: flex; align-items: center;
+    font-size: 24px; font-weight: 400; pointer-events: none;
+  }
+  .panneau.ouvert::after { content: none; }
+  .panneau-info { display: block; padding: 14px var(--m) 16px; transform: none; }
+  .panneau-info p { font-size: 15px; line-height: 1.36; margin-bottom: 12px; }
+  .panneau-info p a { padding-block: 11px; }
+  .panneau-info .bouton { display: flex; width: 100%; height: 46px; padding: 0; font-size: 15px; }
+  .prestations-pied {
+    position: static; height: auto; display: block;
+    padding: 16px var(--m) 0; font-size: 14.5px; line-height: 1.4;
+  }
+
+  /* ———————— L'entreprise : la maison sur toute la largeur, le titre dans le ciel ———————— */
+  .entreprise {
+    --f: clamp(30px, 9.4vw, 54px);
+    --au-dessus: calc(var(--toit) - var(--pente) + 12px); /* l'arête de la photo reste parallèle à celle du toit */
+    height: auto; min-height: 0; overflow: visible; margin-top: 30px; padding-top: var(--au-dessus);
+  }
+  .entreprise-photo {
+    position: relative; left: auto; top: auto; bottom: auto; width: 100%;
+    aspect-ratio: 1.17; max-height: calc(var(--sh) * 96);
+    clip-path: polygon(0 var(--pente), 50% 0, 100% var(--pente), 100% 100%, 0 100%);
+  }
+  .entreprise-titre {
+    top: var(--au-dessus); height: calc(var(--f) * .82 + 14px); padding: 0 var(--m);
+    column-gap: 9px; font-size: var(--f);
+  }
+  .entreprise-socle { position: static; height: auto; padding: 18px var(--m) 0; gap: 10px; }
+  .entreprise-socle ul {
+    flex-wrap: wrap; justify-content: flex-start; gap: .12em .42em;
+    font-size: clamp(22px, 6.7vw, 34px); margin: 0 0 0 -.025em;
+  }
+  .entreprise-socle p { font-size: 15px; line-height: 1.42; }
+
+  /* ———————— Façades : le titre, la photo, et le bouton sous le pouce ———————— */
+  .facade { height: auto; min-height: 0; overflow: visible; display: flex; flex-direction: column; padding-top: var(--section); }
+  .facade-texte { display: contents; }
+  .facade-titre { font-size: var(--titre); line-height: 1; margin: 0 var(--m) 14px calc(var(--m) - .04em); white-space: normal; }
+  .facade-titre span { display: inline; }
+  .facade-photos {
+    position: relative; top: auto; right: auto; bottom: auto; order: 1; width: 100%;
+    aspect-ratio: 1800 / 1889; max-height: calc(var(--sh) * 88);
+    touch-action: pan-y; -webkit-touch-callout: none; -webkit-user-select: none;
+  }
+  .facade-photos img { -webkit-touch-callout: none; }
+  .facade-bouton {
+    order: 2; margin: 12px var(--m) 0; min-width: 0; height: 50px; padding: 0; font-size: 15.5px;
+    touch-action: none; -webkit-touch-callout: none; -webkit-user-select: none;
+  }
+
+  /* ———————— La fresque : un mur qui se déplace au doigt, à l'horizontale ———————— */
+  .mur { height: auto; min-height: 0; display: flex; flex-direction: column; padding-top: var(--section); background: var(--noir); }
+  .mur-entete { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 0 var(--m); }
+  .mur-entete h2 { font-size: var(--titre); margin-left: -.035em; }
+  .mur-entete p { color: var(--gris); font-size: 13px; }
+  .mur-commandes { position: static; height: auto; background: none; padding: 6px 0 10px; display: block; }
+  .mur-aide, .mur-titre { display: none; }
+  .mur-filtres {
+    gap: clamp(15px, 4vw, 26px); padding: 0 var(--m); font-size: 14.5px;
+    overflow-x: auto; scrollbar-width: none; -webkit-overflow-scrolling: touch;
+  }
+  .mur-filtres::-webkit-scrollbar { display: none; }
+  .mur-filtres button { position: relative; flex: none; padding: 12px 0; white-space: nowrap; }
+  .mur-filtres button::after { content: ''; position: absolute; inset: 0 -7px; } /* zone à toucher plus large que le mot */
+  .mur-curseur { bottom: 7px; height: 2px; }
+  .mur-vue {
+    position: relative; inset: auto; order: 3; height: clamp(280px, calc(var(--sh) * 64), 640px);
+    touch-action: pan-y; cursor: auto; background: var(--noir);
+  }
+  .tuile .volet { --fond: #050507; }
+
+  /* Visionneuse */
+  .visionneuse { width: 100%; height: 100vh; height: 100dvh; touch-action: pinch-zoom; }
+  .visionneuse-haut { top: calc(12px + env(safe-area-inset-top)); align-items: center; }
+  .visionneuse-titre { font-size: 24px; }
+  .visionneuse-fermer { font-size: 14px; padding: 13px 18px; }
+  .visionneuse-traits { bottom: calc(16px + env(safe-area-inset-bottom)); height: 3px; }
+
+  /* ———————— Urgence : un bandeau bleu, le numéro à portée de pouce ———————— */
+  .urgence { margin-top: 44px; padding: 26px var(--m) 22px; gap: 6px; }
+  .urgence-titre { font-size: clamp(21px, 6.2vw, 32px); line-height: 1.06; white-space: normal; margin: 0; text-wrap: balance; }
+  .urgence-tel { font-size: clamp(40px, 12.4vw, 66px); line-height: 1; align-self: flex-start; margin: 0 0 0 -.04em; padding: 4px 0; }
+  .urgence-tel:active { color: var(--noir); }
+  .urgence-lien { position: static; align-self: flex-start; padding: 12px 0 6px; margin-bottom: -4px; font-size: 14.5px; }
+  .urgence-lien:active { color: var(--noir); }
+
+  /* ———————— Zones d'intervention : la liste, puis la carte sur toute la largeur ———————— */
+  .zone { display: block; min-height: 0; padding: var(--section) var(--m) 0; overflow: hidden; }
+  .zone-titre { font-size: var(--titre); line-height: 1; margin: 0 0 10px -.035em; }
+  .zone-intro { font-size: 15.5px; margin-bottom: 12px; }
+  .zone-liste ul { font-size: clamp(20px, 5.9vw, 30px); line-height: 1.1; }
+  .zone-liste li { padding: .1em 0; }
+  .zone-rayon { font-size: 14px; margin-top: 12px; max-width: none; }
+  .zone-rayon a { padding-block: 11px; } /* une cible plus haute que la ligne, sans la déplacer */
+  .zone-carte { margin-top: 18px; max-height: none; }
+  .zone-carte .numero { font-size: 150px; }
+  .zone-carte .km { font-size: 50px; }
+  .zone-carte .nom { font-size: 50px; }
+  .zone-carte .centre .nom { font-size: 54px; }
+
+  /* Avis */
+  .avis { grid-template-columns: 1fr; gap: 28px; padding: var(--section) var(--m) 0; }
+  .avis blockquote { font-size: 16.5px; }
+
+  /* ———————— Devis : le seul moment clair. Une colonne, des champs confortables ———————— */
+  .devis {
+    display: flex; flex-direction: column; min-height: 0;
+    margin-top: 50px; padding: calc(var(--toit) + 10px) var(--m) 28px;
+  }
+  .devis-gauche { display: contents; }
+  .devis-titre { font-size: var(--titre); margin: 0 0 20px -.04em; }
+  .devis-form { grid-template-columns: 1fr; gap: 18px; }
+  .devis-contact { order: 2; margin-top: 24px; gap: 0; }
+  .devis-tel { font-size: clamp(30px, 8.6vw, 44px); padding: 6px 0; }
+  .devis-mail { font-size: 15.5px; overflow-wrap: anywhere; padding: 9px 0; }
+  .champ label, .pastilles legend { font-size: 13.5px; margin-bottom: 2px; }
+  .champ input, .champ textarea { font-size: 16px; padding: 8px 0 9px; } /* 16 px : iOS ne zoome pas sur le champ */
+  .champ-erreur { font-size: 13px; }
+  .pastilles { gap: 7px; }
+  .pastilles legend { margin-bottom: 7px; }
+  .pastilles label { font-size: 14.5px; }
+  .pastilles span { padding: 9px 14px; border-width: 1.5px; }
+  .devis-envoi { grid-template-columns: 1fr; gap: 12px; }
+  .devis-envoi .bouton { order: -1; width: 100%; height: 52px; padding: 0; font-size: 16px; }
+  .devis-mention { font-size: 13px; line-height: 1.36; max-width: none; }
+  .devis-mention .lien { display: inline-block; padding: 12px 8px 12px 0; margin: -12px 0; }
+
+  /* ———————— Pied de page ———————— */
+  .pied { padding: 18px var(--m) calc(14px + env(safe-area-inset-bottom)); font-size: 14px; }
+  .pied-ligne { height: auto; grid-template-columns: auto 1fr; gap: 6px 16px; align-items: start; }
+  .pied-logo { width: 78px; grid-row: span 2; }
+  .pied-nap { padding-top: 4px; }
+  .pied-contact { flex-direction: column; gap: 0; overflow-wrap: anywhere; }
+  .pied-contact a { padding: 11px 0; }
+  .pied-legal { grid-column: 1 / -1; justify-self: start; padding: 12px 8px 12px 0; }
+  .pied-services { display: grid; gap: 0; padding: 8px 0 4px; margin-top: 6px; }
+  .pied-services a { padding: 10px 0; }
+  .pied-services .pied-avis { margin-left: 0; }
+
+  /* ———————— Menu : le toit descend, les mots montent, un bloc photo monte du bas ———————— */
+  .menu { display: flex; flex-direction: column; touch-action: none; overscroll-behavior: contain; }
+  .menu[hidden] { display: none; }
+  .menu-liens {
+    position: relative; left: auto; top: auto; bottom: auto; flex: none; justify-content: flex-start;
+    padding: calc(var(--toit) + 16px) var(--m) 22px; font-size: clamp(30px, 9.4vw, 46px); line-height: 1.1;
+  }
+  .menu-liens a { padding-block: .03em .07em; margin-block: -.03em -.07em; }
+  .menu-liens:hover span { color: var(--blanc); }
+  .menu-liens a:active span { color: var(--bleu-clair); }
+  .menu-bloc { position: relative; right: auto; top: auto; bottom: auto; width: 100%; flex: 1; min-height: 0; margin-bottom: calc(var(--bas) + env(safe-area-inset-bottom)); }
+
+  /* Mentions légales */
+  .mentions { width: 100%; height: 100vh; height: 100dvh; }
+  .mentions-corps { padding: 18px var(--m) calc(36px + env(safe-area-inset-bottom)); font-size: 15px; }
+  .mentions h2 { font-size: var(--titre); margin-bottom: 18px; padding-right: 90px; }
+  .mentions-colonnes { grid-template-columns: 1fr; gap: 0; }
+  .mentions-colonnes > div + div > h3:first-child { margin-top: 1.5em; }
+  .mentions-colonnes p { overflow-wrap: anywhere; }
+  .mentions-fermer { right: var(--m); top: 12px; font-size: 14px; padding: 13px 18px; }
+}
+
+/* Photo verticale du haut de page : calée sur le faîtage, comme le rendu WebGL posé dessus. */
+@media (max-width: 900px) and (orientation: portrait) {
+  .haut-photo img { object-position: 50% 0; }
+}
+
+/* Téléphone tenu à l'horizontale : tout passe sur la largeur. */
+@media (max-height: 500px) and (orientation: landscape) and (max-width: 1000px) {
+  .haut-titre { font-size: min(6vw, calc(var(--sh) * 15)); }
+  .prestations { --ferme: 54px; --ouvert: min(calc(var(--sh) * 62), 300px); }
+  .panneau-titre { font-size: 24px; }
+  .panneau-info { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px var(--m); }
+  .panneau-info p { margin: 0; }
+  .panneau-info .bouton { flex: none; width: auto; height: 42px; padding: 0 18px; }
+  .entreprise-photo { aspect-ratio: 1.45; max-height: none; }
+  .facade-photos { aspect-ratio: 1.9; max-height: none; }
+  .menu { flex-direction: row; }
+  .menu-liens { padding: 62px var(--m) 62px; font-size: min(5vw, calc(var(--sh) * 11)); flex: 1 1 50%; }
+  .menu-bloc { flex: 1 1 50%; margin: 48px 0 0; }
+  .appel { left: 50%; }
+  .zone { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.5fr); align-items: center; column-gap: 24px; padding-bottom: 8px; }
+  .zone-carte { margin-top: 0; }
+  .zone-carte .nom { font-size: 34px; }
+  .zone-carte .centre .nom { font-size: 38px; }
+  /* Couché, l'écran est trop bas pour le socle entier : seul le titre reste, à gauche de la barre d'appel. */
+  .haut-socle { padding: 10px 50% calc(10px + env(safe-area-inset-bottom)) var(--m); }
+  .haut-h1 { font-size: 17px; margin: 0; }
+  .haut-intro { display: none; }
+}

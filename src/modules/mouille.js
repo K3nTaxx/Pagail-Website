@@ -7,6 +7,7 @@
 // La trace est un segment entre deux positions, donc continue même si la souris va vite.
 // Rendu seulement quand le haut de page est visible et qu'il reste de l'eau à afficher.
 import { Renderer, Program, Mesh, Triangle, Texture, RenderTarget } from 'ogl';
+import { telephone } from './appareil.js';
 
 const vertex = /* glsl */ `
 attribute vec2 uv;
@@ -132,7 +133,8 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
   try {
     renderer = new Renderer({
       canvas, alpha: false, antialias: false, depth: false, stencil: false,
-      dpr: Math.min(window.devicePixelRatio || 1, 1.5),
+      // Sur téléphone, on suit la finesse de l'écran, mais moins sur un petit processeur.
+      dpr: Math.min(window.devicePixelRatio || 1, telephone && (navigator.hardwareConcurrency || 4) >= 6 ? 2 : 1.5),
       premultipliedAlpha: false, powerPreference: 'high-performance',
     });
   } catch {
@@ -148,13 +150,19 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
   // Tampon d'humidité : demi-flottant, sinon la décroissance se bloque en 8 bits.
   const type = gl.HALF_FLOAT || gl.renderer.extensions['OES_texture_half_float'].HALF_FLOAT_OES;
   const filtre = gl.renderer.isWebgl2 || gl.renderer.extensions['OES_texture_half_float_linear'] ? gl.LINEAR : gl.NEAREST;
+  gl.getExtension('EXT_color_buffer_half_float'); // nécessaire sur iPhone
   const options = {
-    width: 640, height: 400, type, format: gl.RGBA,
+    width: telephone ? 320 : 640, height: telephone ? 560 : 400, type, format: gl.RGBA,
     internalFormat: gl.renderer.isWebgl2 ? gl.RGBA16F : gl.RGBA,
     minFilter: filtre, magFilter: filtre, depth: false,
   };
   let lecture = new RenderTarget(gl, options);
   let ecriture = new RenderTarget(gl, options);
+  // Si le téléphone ne sait pas dessiner dans ce tampon, on renonce : le volet prend le relais.
+  gl.bindFramebuffer(gl.FRAMEBUFFER, lecture.buffer);
+  const tamponValide = gl.checkFramebufferStatus(gl.FRAMEBUFFER) === gl.FRAMEBUFFER_COMPLETE;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+  if (!tamponValide) return null;
 
   const triangle = new Triangle(gl);
   const eau = new Mesh(gl, {
@@ -163,7 +171,7 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
       vertex, fragment: passeEau, depthTest: false, depthWrite: false,
       uniforms: {
         tPrec: { value: lecture.texture }, uA: { value: [0, 0] }, uB: { value: [0, 0] },
-        uRayon: { value: 0.085 }, uAspect: { value: 1 }, uDt: { value: 0.016 }, uForce: { value: 0 },
+        uRayon: { value: telephone ? 0.055 : 0.085 }, uAspect: { value: 1 }, uDt: { value: 0.016 }, uForce: { value: 0 },
       },
     }),
   });
@@ -180,8 +188,12 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
   });
 
   let rect = conteneur.getBoundingClientRect();
+  let largeurVue = 0, hauteurVue = 0;
   const ajuster = () => {
     rect = conteneur.getBoundingClientRect();
+    // Sur téléphone, la barre d'adresse qui se replie déclenche un resize : le canvas ne doit pas se vider.
+    if (telephone && rect.width === largeurVue && rect.height === hauteurVue) return;
+    largeurVue = rect.width; hauteurVue = rect.height;
     renderer.setSize(rect.width, rect.height);
     const aspect = rect.width / rect.height;
     const iw = image.naturalWidth, ih = image.naturalHeight;
@@ -189,7 +201,8 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
     // Même cadrage que object-fit: cover sur l'image placée dessous. L'axe v de la texture est retourné par OGL.
     const ech = aspect > ia ? [1, ia / aspect] : [aspect / ia, 1];
     finale.program.uniforms.uEch.value = ech;
-    finale.program.uniforms.uDec.value = [(1 - ech[0]) / 2, (1 - ech[1]) / 2];
+    // Photo verticale du téléphone : calée sur le haut, comme l'image placée dessous.
+    finale.program.uniforms.uDec.value = [(1 - ech[0]) / 2, ih > iw ? 1 - ech[1] : (1 - ech[1]) / 2];
     finale.program.uniforms.uTexel.value = [1 / iw, 1 / ih];
     finale.program.uniforms.uAspect.value = aspect;
     eau.program.uniforms.uAspect.value = aspect;
@@ -255,7 +268,16 @@ export function mouillerLaTuile({ conteneur, image, canvas }) {
   observateur.observe(conteneur);
 
   window.addEventListener('pointermove', surMouvement, { passive: true });
+  if (telephone) {
+    // Le doigt mouille aussi la tuile, y compris pendant qu'il fait défiler la page.
+    const toucher = (e) => { if (e.touches[0]) surMouvement(e.touches[0]); };
+    window.addEventListener('touchstart', toucher, { passive: true });
+    window.addEventListener('touchmove', toucher, { passive: true });
+    window.addEventListener('touchend', () => { dernier = null; }, { passive: true });
+  }
   window.addEventListener('resize', ajuster, { passive: true });
+  // Téléphone qu'on tourne : le navigateur change de photo (<picture>), la texture doit suivre.
+  if (telephone) image.addEventListener('load', () => { texture.image = image; texture.needsUpdate = true; largeurVue = 0; ajuster(); });
   window.addEventListener('scroll', () => { if (visible) rect = conteneur.getBoundingClientRect(); }, { passive: true });
 
   ajuster();
